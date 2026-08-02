@@ -1,0 +1,473 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * خط هوية (Huwiya) — نفس أسلوب Framer في المرجع:
+ * عائلة منفصلة لكل وزن (وليس font-weight على عائلة واحدة)
+ * حتى لا يُركَّب Bold اصطناعياً ويختلف شكل الحروف.
+ */
+@font-face {
+  font-family: "itf Huwiya Arabic Regular";
+  src: url("https://framerusercontent.com/assets/O7LPtCdRbKOCN6Jqyj64vOg9Y.woff2")
+    format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "itf Huwiya Arabic Medium";
+  src: url("https://framerusercontent.com/assets/lGDAhRSqCONDsCojQmYgJ3G7lM.woff2")
+    format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "itf Huwiya Arabic Bold";
+  src: url("https://framerusercontent.com/assets/WojI6GfHOSNO4hQJWcaWTz4B88c.woff2")
+    format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "itf Huwiya Arabic Black";
+  src: url("https://framerusercontent.com/assets/cL6HdnoyrVTP8wlzoTJA827nA.woff2")
+    format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
+/* Design tokens — مقاسة من الصفحة الرئيسية للموقع المرجعي على عرض 1440px */
+@theme {
+  --font-arabic: "itf Huwiya Arabic Regular", var(--font-ibm-plex-arabic),
+    var(--font-tajawal), sans-serif;
+  --font-arabic-medium: "itf Huwiya Arabic Medium", "itf Huwiya Arabic Regular",
+    var(--font-ibm-plex-arabic), sans-serif;
+  --font-arabic-bold: "itf Huwiya Arabic Bold", "itf Huwiya Arabic Medium",
+    var(--font-ibm-plex-arabic), sans-serif;
+
+  --color-page: #ffffff;
+  --color-surface: #f7f7f7;
+  --color-surface-alt: #f0f0f0;
+  --color-glass: rgba(249, 248, 245, 0.8);
+
+  --color-ink: #111011;
+  --color-ink-title: #333333;
+  --color-ink-price: #242424;
+  --color-ink-secondary: rgba(17, 16, 17, 0.6);
+  --color-ink-muted: #8a8a8a;
+  --color-ink-faq: #1f2a37;
+  --color-inverted: #ffffff;
+
+  /* brand = برتقالي الموقع (منفصل عن --accent في shadcn) */
+  --color-brand: #ff6614;
+  --color-brand-hover: #e85a0f;
+  --color-accent-blue: #82c6db;
+  --color-success: #28d774;
+
+  --color-line: #e5e5e5;
+  --color-line-subtle: #efefef;
+
+  --radius-card: 12px;
+  --radius-media: 9px;
+  --radius-chip: 6px;
+  --radius-field: 10px;
+  --radius-faq: 7px;
+  --radius-tag: 3px;
+  --radius-pill: 999px;
+
+  /* عنوان الهيرو — Huwiya Bold 31/40.3 ls -0.93px */
+  --text-h1: 31px;
+  --text-h1--line-height: 40.3px;
+  --text-h1--font-weight: 700;
+  --text-h1--letter-spacing: -0.03em;
+
+  /* عنوان القسم — Huwiya Medium 17/24 */
+  --text-h2: 17px;
+  --text-h2--line-height: 24px;
+  --text-h2--font-weight: 500;
+
+  /* عنوان البطاقة — Huwiya Bold 13 ls -0.26px */
+  --text-h3: 13px;
+  --text-h3--line-height: 15.6px;
+  --text-h3--font-weight: 700;
+  --text-h3--letter-spacing: -0.02em;
+
+  /* فقرة الهيرو — Huwiya Regular 15/22.5 */
+  --text-lead: 15px;
+  --text-lead--line-height: 22.5px;
+  --text-lead--font-weight: 400;
+
+  --text-body: 14px;
+  --text-body--line-height: 19.6px;
+  --text-body--font-weight: 400;
+  --text-body--letter-spacing: -0.02em;
+
+  --text-small: 13px;
+  --text-small--line-height: 24px;
+  --text-small--font-weight: 500;
+
+  --text-micro: 11px;
+  --text-micro--line-height: 24px;
+  --text-micro--font-weight: 400;
+
+  --text-nano: 10px;
+  --text-nano--line-height: 1.5;
+  --text-nano--font-weight: 500;
+
+  --text-tag: 9px;
+  --text-tag--line-height: 1.2;
+  --text-tag--font-weight: 500;
+
+  --text-question: 15px;
+  --text-question--line-height: 24px;
+  --text-question--font-weight: 700;
+
+  --text-stat: 34px;
+  --text-stat--line-height: 1;
+  --text-stat--font-weight: 400;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-arabic);
+    font-size: var(--text-body);
+    font-weight: 400;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* أوزان Huwiya عبر تبديل العائلة — كما في المرجع */
+  .font-medium,
+  .text-h2,
+  .text-small,
+  .text-nano,
+  .text-tag {
+    font-family: var(--font-arabic-medium);
+  }
+
+  .font-bold,
+  .font-semibold,
+  .text-h1,
+  .text-h3,
+  .text-question,
+  h1,
+  h3,
+  strong,
+  b {
+    font-family: var(--font-arabic-bold);
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-inverted);
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
+
+/* عمود المحتوى في المرجع = 800px صافي (840 مع الحشو) */
+@utility container-site {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 840px;
+  padding-inline: 20px;
+}
+
+@utility section-y {
+  padding-block: 40px;
+
+  @variant lg {
+    padding-block: 50px;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* نبضة نقطة التوفر — 1150ms بنابض مرن كما في المرجع (Framer spring) */
+@keyframes availability-ring {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.35;
+  }
+  35% {
+    transform: scale(1.15);
+    opacity: 0.12;
+  }
+  70% {
+    transform: scale(0.95);
+    opacity: 0.18;
+  }
+  100% {
+    transform: scale(0.55);
+    opacity: 0.35;
+  }
+}
+
+@keyframes availability-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+}
+
+@utility animate-availability-ring {
+  animation: availability-ring 1150ms linear infinite;
+}
+
+@utility animate-availability-dot {
+  animation: availability-dot 1150ms linear infinite;
+}
+
+/* ظهور الأقسام عند التمرير */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 18px), 0);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@utility animate-hero-enter {
+  animation: hero-enter 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* شريط شعارات العملاء — تمرير تلقائي بطيء (~27px/ث في المرجع) */
+@keyframes logo-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+
+@utility animate-logo-marquee {
+  animation: logo-marquee 22s linear infinite;
+}
+
+@keyframes nav-progress {
+  0% {
+    transform: translateX(100%);
+  }
+  40% {
+    transform: translateX(35%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@utility animate-nav-progress {
+  animation: nav-progress 1.1s ease-in-out infinite;
+}
+
+/* انتقال أقسام لوحة التحكم */
+@keyframes admin-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-page-enter {
+  animation: admin-page-enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* انتقال خطوات استمارة طلب المشروع */
+@keyframes form-step-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@utility animate-form-step-in {
+  animation: form-step-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* سلايدر تقييمات الدورة */
+@media (prefers-reduced-motion: reduce) {
+  .animate-logo-marquee,
+  .animate-availability-ring,
+  .animate-availability-dot,
+  .animate-nav-progress,
+  .animate-hero-enter,
+  .animate-form-step-in,
+  .admin-page-enter {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@theme inline {
+  --font-heading: var(--font-arabic-bold);
+  --font-sans: var(--font-arabic);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ثيم shadcn بهوية منتظر — primary = برتقالي العلامة */
+:root {
+  --background: #ffffff;
+  --foreground: #111011;
+  --card: #ffffff;
+  --card-foreground: #111011;
+  --popover: #ffffff;
+  --popover-foreground: #111011;
+  --primary: #ff6614;
+  --primary-foreground: #ffffff;
+  --secondary: #f7f7f7;
+  --secondary-foreground: #111011;
+  --muted: #f7f7f7;
+  --muted-foreground: #8a8a8a;
+  --accent: #f0f0f0;
+  --accent-foreground: #111011;
+  --destructive: #dc2626;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #ff6614;
+  --chart-1: #ff6614;
+  --chart-2: #82c6db;
+  --chart-3: #333333;
+  --chart-4: #8a8a8a;
+  --chart-5: #f0f0f0;
+  --radius: 0.625rem;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #111011;
+  --sidebar-primary: #ff6614;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f0f0;
+  --sidebar-accent-foreground: #111011;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #ff6614;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}

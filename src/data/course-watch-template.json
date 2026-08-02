@@ -1,0 +1,196 @@
+{
+  "$schemaComment": "هيكل صفحة مشاهدة الدورة (LMS) — مستوحى من مرجع منصة التعلم مع ملاحظات التنفيذ لموقع منتظر",
+  "meta": {
+    "version": 1,
+    "themeNote": "الواجهة تستخدم ثيم موقع منتظر الفاتح (page/surface/brand) وليس الثيم الداكن للمرجع",
+    "route": "/products/[slug]/learn"
+  },
+  "course": {
+    "title": "أساسيات الهوية البصرية",
+    "subtitle": "دورة رقمية مسجّلة",
+    "totalLessons": 12,
+    "totalDurationLabel": "٣ ساعات و ٤٥ دقيقة",
+    "totalDurationMinutes": 225
+  },
+  "player": {
+    "emptyPosterUrl": "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=1400&q=80",
+    "emptyMessage": "اختر درساً من قائمة المحتوى للبدء"
+  },
+  "actions": {
+    "exitLabel": "خروج",
+    "completeLessonLabel": "إكمال الدرس",
+    "rateCourseLabel": "قيّم الدورة",
+    "askQuestionLabel": "اطرح سؤالاً"
+  },
+  "tabs": {
+    "qa": {
+      "id": "qa",
+      "label": "الأسئلة والأجوبة",
+      "enabled": true,
+      "emptyTitle": "لا توجد أسئلة بعد",
+      "emptyDescription": "كن أول من يسأل حول هذا الدرس أو الدورة.",
+      "filters": [
+        { "id": "lesson", "label": "هذا الدرس" },
+        { "id": "course", "label": "كل الدورة" },
+        { "id": "top", "label": "الأعلى تصويتاً" }
+      ],
+      "searchPlaceholder": "ابحث في الأسئلة…"
+    },
+    "certificate": {
+      "id": "certificate",
+      "label": "الشهادة",
+      "enabled": true,
+      "title": "شهادة إتمام الدورة",
+      "description": "ستتوفر الشهادة بعد إكمال جميع دروس الدورة.",
+      "lockedMessage": "أكمل كل الدروس لفتح الشهادة",
+      "downloadLabel": "تحميل الشهادة"
+    }
+  },
+  "sidebar": {
+    "title": "محتوى الدورة",
+    "progressLabel": "قيد التعلّم"
+  },
+  "sections": [
+    {
+      "id": "sec-intro",
+      "title": "المقدمة",
+      "lessonsCountLabel": "٣ دروس",
+      "durationLabel": "٢٨ دقيقة",
+      "lessons": [
+        {
+          "id": "les-intro-1",
+          "title": "من أنا وعن التدريب",
+          "duration": "08:20",
+          "durationSeconds": 500,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-intro-2",
+          "title": "النتائج التي سنصل إليها",
+          "duration": "09:15",
+          "durationSeconds": 555,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-intro-3",
+          "title": "المصطلحات المختلفة في مجال الهويات",
+          "duration": "10:40",
+          "durationSeconds": 640,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=1200&q=80"
+        }
+      ]
+    },
+    {
+      "id": "sec-brief",
+      "title": "البريف والتسعير",
+      "lessonsCountLabel": "٣ دروس",
+      "durationLabel": "٤٥ دقيقة",
+      "lessons": [
+        {
+          "id": "les-brief-1",
+          "title": "كيف تتم المحادثات مع العميل",
+          "duration": "14:10",
+          "durationSeconds": 850,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-brief-2",
+          "title": "ما هو البريف وكيف نجهّزه",
+          "duration": "15:30",
+          "durationSeconds": 930,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-brief-3",
+          "title": "تسعير مشروع الهوية البصرية",
+          "duration": "15:20",
+          "durationSeconds": 920,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80"
+        }
+      ]
+    },
+    {
+      "id": "sec-design",
+      "title": "تصميم الشعار والخط",
+      "lessonsCountLabel": "٤ دروس",
+      "durationLabel": "٧٢ دقيقة",
+      "lessons": [
+        {
+          "id": "les-design-1",
+          "title": "أنواع الشعارات وشروط الاختيار",
+          "duration": "16:45",
+          "durationSeconds": 1005,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1626785774625-ddcddc3445e9?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-design-2",
+          "title": "تصميم الأيقونة",
+          "duration": "18:20",
+          "durationSeconds": 1100,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-design-3",
+          "title": "اختيار وتصميم الخط",
+          "duration": "17:05",
+          "durationSeconds": 1025,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1626785774573-4b7993143499?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-design-4",
+          "title": "ملحق — تمارين تطبيقية",
+          "duration": "20:00",
+          "durationSeconds": 1200,
+          "type": "file",
+          "videoUrl": "",
+          "fileUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1200&q=80"
+        }
+      ]
+    },
+    {
+      "id": "sec-delivery",
+      "title": "التسليم وعرض المشروع",
+      "lessonsCountLabel": "٢ دروس",
+      "durationLabel": "٤٠ دقيقة",
+      "lessons": [
+        {
+          "id": "les-delivery-1",
+          "title": "ملف دليل الهوية والتسليم النهائي",
+          "duration": "19:30",
+          "durationSeconds": 1170,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          "id": "les-delivery-2",
+          "title": "عرض المشروع في ملف أعمالك",
+          "duration": "20:30",
+          "durationSeconds": 1230,
+          "type": "video",
+          "videoUrl": "",
+          "posterUrl": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80"
+        }
+      ]
+    }
+  ]
+}

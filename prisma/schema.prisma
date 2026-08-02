@@ -1,0 +1,390 @@
+// قاعدة بيانات منتظر — Supabase / PostgreSQL عبر Prisma.
+// كل محتوى موصوف بـ "dynamic" في page-home.json له جدول هنا،
+// عشان لوحة تحكم المصمم تقدر تديره كامل بدون تعديل كود.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// إعدادات الموقع العامة — صف واحد فقط (singleton) مفتاحه id = "default"
+model SiteSettings {
+  id String @id @default("default")
+
+  designerName String @default("منتظر")
+  siteName     String @default("منتظر")
+  avatarUrl    String?
+  heroImageUrl String?
+
+  /// مؤشر حالة التوفّر في البادج العائم بالهيرو (نص البادج ثابت بالكود)
+  availableForWork Boolean @default(true)
+
+  contactEmail          String?
+  whatsappUrl           String?
+  projectRequestFormUrl String?
+  /// رابط بورتفوليو خارجي اختياري (مثل Behance) يظهر كأيقونة بجانب زر طلب المشروع في صفحة الأعمال
+  externalPortfolioUrl  String?
+
+  /// أرقام التحويل المالي لشراء الدورات
+  qiCardAccount   String?
+  zainCashAccount String?
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("site_settings")
+}
+
+model SocialLink {
+  id       String  @id @default(cuid())
+  platform String
+  url      String
+  order    Int     @default(0)
+  enabled  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, order])
+  @@map("social_links")
+}
+
+/// أرقام قسم الإحصائيات — التسميات ثابتة، والقيمة يدخلها المصمم
+model Stat {
+  id    String @id @default(cuid())
+  slug  String @unique
+  label String
+  value String @default("")
+  order Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stats")
+}
+
+model Project {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  title     String
+  category  String
+  /// صورة كارد القائمة (وأحياناً غلاف التفاصيل إن لم تُحدد coverImageUrl)
+  imageUrl  String?
+  href      String?
+  order     Int     @default(0)
+  published Boolean @default(true)
+
+  /// وصف case study الطويل
+  description String? @db.Text
+  /// بطاقات الميتا: [{ "label": "العام", "value": "2026" }, ...]
+  meta Json?
+  /// صورة عرض الشعار (logo showcase)
+  logoImageUrl String?
+  /// صورة الغلاف العريضة بصفحة التفاصيل
+  coverImageUrl String?
+  /// معرض عناصر الهوية: [{ imageUrl, caption?, layout?: "full"|"half", aspect? }]
+  brandGallery Json?
+  /// معرض تطبيقات الهوية (موك أب)
+  applicationGallery Json?
+  /// رابط case study خارجي اختياري (Behance…)
+  externalCaseStudyUrl   String?
+  externalCaseStudyLabel String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+  @@map("projects")
+}
+
+model Product {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  /// نوع المنتج: دورة رقميّة مسجّلة / معسكر تدريبي / كتيّب إلكتروني ...
+  type      String
+  title     String
+  /// وصف قصير يظهر في بطاقة أرشيف المنتجات
+  description String?
+  /// وصف تفصيلي لصفحة الكتيّب (نص متعدد الأسطر)
+  body      String? @db.Text
+  /// نص حر: "$40" أو "مجاني" أو "قريباً"
+  price     String
+  ctaLabel  String  @default("اعرف أكثر")
+  href      String?
+  imageUrl  String?
+  /// صورة/موك أب كبيرة في صفحة التفاصيل
+  coverImageUrl String?
+  /// ملفات التحميل: [{ "name": "file.pdf", "url": "https://..." }]
+  files     Json?
+  /// محتوى صفحة تفاصيل الدورة (للمنتجات group=core)
+  courseDetail Json?
+  /// محتوى مشاهدة الدورة: محاور + دروس + فيديو + ملحقات
+  courseWatch Json?
+  downloadsCount Int @default(0)
+  /// قسم الأرشيف: "core" = الدورات التدريبية، "resource" = مكتبة الكتيبات
+  group     String  @default("resource")
+  order     Int     @default(0)
+  published Boolean @default(true)
+
+  entitlements CustomerEntitlement[]
+  cartItems    CartItem[]
+  purchaseRequests CoursePurchaseRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+  @@index([published, group, order])
+  @@map("products")
+}
+
+/// عملاء المتجر — جمع الإيميلات للحملات + بوابة تحميل الكتيبات
+model Customer {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  name         String
+  phone        String?
+  /// كلمة المرور اختيارية عند التسجيل عبر Google
+  passwordHash String?
+  /// معرّف حساب Google (إن وُجد)
+  googleId     String? @unique
+  /// صورة بروفايل يرفعها المستخدم (تتجاوز صورة Google إن وُجدت)
+  avatarUrl       String?
+  /// صورة حساب Google الافتراضية
+  googleAvatarUrl String?
+
+  /// موقع تقريبي عند التسجيل (من IP)
+  countryCode String?
+  country     String?
+  region      String?
+  city        String?
+
+  entitlements CustomerEntitlement[]
+  cartItems    CartItem[]
+  purchaseRequests CoursePurchaseRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([countryCode])
+  @@map("customers")
+}
+
+/// صلاحية الوصول لكتيّب (مجاني حالياً — بوابة الدفع لاحقاً)
+model CustomerEntitlement {
+  id         String @id @default(cuid())
+  customerId String
+  productId  String
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, productId])
+  @@index([customerId])
+  @@map("customer_entitlements")
+}
+
+/// عناصر سلة المشتريات المرتبطة بحساب العميل
+model CartItem {
+  id         String @id @default(cuid())
+  customerId String
+  productId  String
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([customerId, productId])
+  @@index([customerId])
+  @@map("cart_items")
+}
+
+/// طلبات شراء الدورات عبر تحويل مالي خارجي (كي كارد / زين كاش)
+model CoursePurchaseRequest {
+  id              String @id @default(cuid())
+  customerId      String
+  productId       String
+  /// رقم واتساب للتواصل
+  whatsappPhone   String
+  /// صورة إيصال التحويل المالي
+  receiptImageUrl String
+  /// pending | approved | rejected
+  status          String  @default("pending")
+  adminNote       String? @db.Text
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+  @@index([productId])
+  @@map("course_purchase_requests")
+}
+
+/// بانر "جديد" — قسم اختياري بالكامل، لا يظهر إلا لو فعّله المصمم
+model FeaturedBanner {
+  id      String  @id @default("default")
+  enabled Boolean @default(false)
+
+  title       String?
+  contentType String?
+  href        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("featured_banner")
+}
+
+model Award {
+  id          String  @id @default(cuid())
+  org         String
+  title       String
+  description String
+  imageUrl    String?
+  order       Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("awards")
+}
+
+model DigitalImpact {
+  id       String @id @default(cuid())
+  platform String
+  value    String
+  /// نوع العد: متابع / مستفيد / مشاهدة
+  label    String
+  url      String?
+  order    Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("digital_impact")
+}
+
+model CurrentTask {
+  id        String  @id @default(cuid())
+  text      String
+  completed Boolean @default(false)
+  tag       String?
+  tagHref   String?
+  order     Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("current_tasks")
+}
+
+model CareerHighlight {
+  id    String @id @default(cuid())
+  text  String
+  order Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("career_highlights")
+}
+
+model ClientLogo {
+  id      String  @id @default(cuid())
+  name    String
+  logoUrl String?
+  order   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("client_logos")
+}
+
+model Testimonial {
+  id    String @id @default(cuid())
+  quote String
+  name  String
+  title String
+  order Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model Faq {
+  id       String @id @default(cuid())
+  question String
+  answer   String
+  order    Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faqs")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_subscribers")
+}
+
+/// أسئلة استمارة طلب المشروع — قابلة للتعديل من لوحة التحكم
+model ProjectFormQuestion {
+  id       String  @id @default(cuid())
+  /// مفتاح ثابت للربط في الإجابات (مثل name, help_type)
+  key      String  @unique
+  /// عنوان السؤال — يمكن استخدام {الاسم}
+  heading  String
+  /// نص فرعي اختياري (مثل ترحيب الخطوة الأولى)
+  subtext  String?
+  /// text | textarea | single_select | multi_select | contact_methods
+  type     String
+  required Boolean @default(true)
+  /// خيارات الاختيار: ["خيار 1", ...] — أو قنوات التواصل
+  options  Json?
+  order    Int     @default(0)
+  enabled  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("project_form_questions")
+}
+
+/// ردود استمارة طلب المشروع
+model ProjectFormResponse {
+  id      String @id @default(cuid())
+  /// الإجابات: { "name": "...", "help_type": "...", ... }
+  answers Json
+  /// حقول مفهرسة للعرض السريع
+  name             String?
+  helpType         String?
+  contactEmail     String?
+  contactWhatsapp  String?
+  contactInstagram String?
+  status           String  @default("new")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@map("project_form_responses")
+}
