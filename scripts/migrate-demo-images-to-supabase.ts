@@ -39,7 +39,10 @@ async function main() {
   const projectUrl = getSupabaseProjectUrl();
   if (!supabase || !projectUrl) throw new Error("عميل Supabase غير متاح");
 
-  await ensureMediaBucket(supabase);
+  const client = supabase;
+  const baseUrl = projectUrl;
+
+  await ensureMediaBucket(client);
   const bucket = getMediaBucket();
   const prisma = new PrismaClient();
   const cache = new Map<string, string>();
@@ -52,13 +55,13 @@ async function main() {
     const objectKey = objectKeyFromLocalUrl(url);
     const bytes = await readFile(filePath);
 
-    const { error } = await supabase.storage.from(bucket).upload(objectKey, bytes, {
+    const { error } = await client.storage.from(bucket).upload(objectKey, bytes, {
       contentType: "image/jpeg",
       upsert: true,
     });
     if (error) throw new Error(`${objectKey}: ${error.message}`);
 
-    const publicUrl = `${projectUrl}/storage/v1/object/public/${bucket}/${objectKey}`;
+    const publicUrl = `${baseUrl}/storage/v1/object/public/${bucket}/${objectKey}`;
     cache.set(url, publicUrl);
     console.log(`↑ ${url} → ${publicUrl}`);
     return publicUrl;
