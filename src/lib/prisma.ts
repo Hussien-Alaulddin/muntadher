@@ -8,10 +8,29 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /** يُزاد عند تغيير الـ schema حتى لا يبقى عميل قديم في ذاكرة Next */
-const PRISMA_CLIENT_REVISION = 5;
+const PRISMA_CLIENT_REVISION = 6;
 
-const databaseUrl = normalizeDatabaseUrl(process.env.DATABASE_URL);
-const directUrl = normalizeDatabaseUrl(process.env.DIRECT_URL);
+/**
+ * Hostinger أحياناً يعيد كتابة DATABASE_URL إلى Postgres (Supabase).
+ * نفضّل MYSQL_DATABASE_URL إن وُجد.
+ */
+function resolveRawDatabaseUrl(): string | null {
+  const candidates = [
+    process.env.MYSQL_DATABASE_URL,
+    process.env.HOSTINGER_DATABASE_URL,
+    process.env.DATABASE_URL,
+  ];
+  for (const raw of candidates) {
+    const url = raw?.trim();
+    if (url?.startsWith("mysql://")) return url;
+  }
+  return process.env.DATABASE_URL?.trim() || null;
+}
+
+const databaseUrl = normalizeDatabaseUrl(resolveRawDatabaseUrl());
+const directUrl = normalizeDatabaseUrl(
+  process.env.DIRECT_URL?.trim() || resolveRawDatabaseUrl(),
+);
 
 export const isDatabaseConfigured = Boolean(databaseUrl);
 

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "prisma generate && node scripts/db-push-safe.js && next build",
-    "start": "next start",
+    "build": "node scripts/with-mysql-url.js prisma generate && node scripts/db-push-safe.js && node scripts/with-mysql-url.js next build",
+    "start": "node scripts/with-mysql-url.js next start",
     "lint": "next lint",
     "db:check": "tsx scripts/check-db.ts",
     "db:push": "prisma db push",
