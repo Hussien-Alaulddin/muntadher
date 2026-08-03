@@ -27,6 +27,11 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { adminNav } from "@/lib/admin-ui-meta";
+import {
+  adminPath,
+  adminPathSuffix,
+  isAdminPublicPathname,
+} from "@/lib/admin-base-path";
 import { adminFetch, prefetchAdmin, prefetchAdminNav } from "@/lib/admin-api";
 import { AdminPageTransition } from "@/components/admin/admin-page-transition";
 import {
@@ -53,61 +58,62 @@ import {
 } from "@/components/ui/sidebar";
 
 const NAV_ICONS: Record<string, typeof LayoutDashboardIcon> = {
-  "/admin": LayoutDashboardIcon,
-  "/admin/settings": SettingsIcon,
-  "/admin/customers": UsersIcon,
-  "/admin/course-purchases": ShoppingBagIcon,
-  "/admin/form-questions": ClipboardListIcon,
-  "/admin/form-responses": MessagesSquareIcon,
-  "/admin/projects": BriefcaseBusinessIcon,
-  "/admin/courses": GraduationCapIcon,
-  "/admin/booklets": BookOpenIcon,
-  "/admin/stats": BarChart3Icon,
-  "/admin/awards": AwardIcon,
-  "/admin/digital-impact": GlobeIcon,
-  "/admin/tasks": ListTodoIcon,
-  "/admin/career-highlights": RouteIcon,
-  "/admin/client-logos": Building2Icon,
-  "/admin/testimonials": MessageSquareQuoteIcon,
-  "/admin/faqs": CircleHelpIcon,
-  "/admin/socials": Link2Icon,
-  "/admin/reports": FileSpreadsheetIcon,
+  "": LayoutDashboardIcon,
+  "/settings": SettingsIcon,
+  "/customers": UsersIcon,
+  "/course-purchases": ShoppingBagIcon,
+  "/form-questions": ClipboardListIcon,
+  "/form-responses": MessagesSquareIcon,
+  "/projects": BriefcaseBusinessIcon,
+  "/courses": GraduationCapIcon,
+  "/booklets": BookOpenIcon,
+  "/stats": BarChart3Icon,
+  "/awards": AwardIcon,
+  "/digital-impact": GlobeIcon,
+  "/tasks": ListTodoIcon,
+  "/career-highlights": RouteIcon,
+  "/client-logos": Building2Icon,
+  "/testimonials": MessageSquareQuoteIcon,
+  "/faqs": CircleHelpIcon,
+  "/socials": Link2Icon,
+  "/reports": FileSpreadsheetIcon,
 };
 
 function navIcon(href: string) {
-  return NAV_ICONS[href] ?? LayoutDashboardIcon;
+  return NAV_ICONS[adminPathSuffix(href)] ?? LayoutDashboardIcon;
 }
 
 function prefetchNavTarget(href: string) {
-  if (href === "/admin") {
+  const suffix = adminPathSuffix(href);
+  if (suffix === "") {
     prefetchAdmin("/api/admin/overview?part=kpis");
     return;
   }
-  if (href === "/admin/reports") {
+  if (suffix === "/reports") {
     prefetchAdmin("/api/admin/reports");
     return;
   }
-  if (href === "/admin/settings") {
+  if (suffix === "/settings") {
     prefetchAdmin("/api/admin/settings");
     return;
   }
-  if (href === "/admin/customers") {
+  if (suffix === "/customers") {
     prefetchAdmin("/api/admin/customers");
     return;
   }
-  if (href === "/admin/course-purchases") {
+  if (suffix === "/course-purchases") {
     prefetchAdmin("/api/admin/course-purchases");
     return;
   }
-  if (href === "/admin/form-questions") {
+  if (suffix === "/form-questions") {
     prefetchAdmin("/api/admin/form-questions");
     return;
   }
-  if (href === "/admin/form-responses") {
+  if (suffix === "/form-responses") {
     prefetchAdmin("/api/admin/form-responses");
     return;
   }
-  const collection = href.replace(/^\/admin\//, "");
+  const collection = suffix.replace(/^\//, "");
   if (collection) prefetchAdmin(`/api/admin/${collection}`);
 }
 
@@ -117,6 +123,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [loggingOut, setLoggingOut] = useState(false);
   const { formCount: newFormCount, customerCount: newCustomerCount } =
     useAdminFormNotifications(true);
+  const loginPath = adminPath("/login");
 
   useEffect(() => {
     let cancelled = false;
@@ -127,19 +134,19 @@ export function AdminShell({ children }: { children: ReactNode }) {
           cache: "no-store",
         });
         if (cancelled || res.ok) return;
-        const login = new URL("/admin/login", window.location.origin);
-        if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+        const login = new URL(loginPath, window.location.origin);
+        if (isAdminPublicPathname(pathname) && pathname !== loginPath) {
           login.searchParams.set("next", pathname);
         }
         window.location.replace(login.toString());
       } catch {
-        if (!cancelled) window.location.replace("/admin/login");
+        if (!cancelled) window.location.replace(loginPath);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [pathname]);
+  }, [pathname, loginPath]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => prefetchAdminNav(), 50);
@@ -150,7 +157,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     setLoggingOut(true);
     try {
       await adminFetch("/api/admin/auth", { method: "DELETE" });
-      router.replace("/admin/login");
+      router.replace(loginPath);
       router.refresh();
     } finally {
       setLoggingOut(false);
@@ -222,10 +229,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
                           <span>{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
-                      {item.href === "/admin/form-responses" ? (
+                      {item.href === adminPath("/form-responses") ? (
                         <AdminNavCountBadge count={newFormCount} />
                       ) : null}
-                      {item.href === "/admin/customers" ? (
+                      {item.href === adminPath("/customers") ? (
                         <AdminNavCountBadge count={newCustomerCount} />
                       ) : null}
                     </SidebarMenuItem>

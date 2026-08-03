@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import { cookies } from "next/headers";
-import AdminLoading from "@/app/admin/loading";
+import AdminLoading from "@/app/m-6769c0/loading";
 import { AdminAuthRedirect } from "@/components/admin/admin-auth-redirect";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { ADMIN_COOKIE } from "@/lib/admin-constants";

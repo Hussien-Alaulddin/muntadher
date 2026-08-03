@@ -6,6 +6,10 @@ import {
   setAdminCache,
   setInflight,
 } from "@/lib/admin-cache";
+import {
+  adminPath,
+  isAdminPublicPathname,
+} from "@/lib/admin-base-path";
 import { invalidateOverviewCache } from "@/lib/admin-overview";
 
 export class AdminApiError extends Error {
@@ -43,8 +47,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       !path.startsWith("/api/admin/auth")
     ) {
       const here = window.location.pathname;
-      if (here.startsWith("/admin") && here !== "/admin/login") {
-        const login = new URL("/admin/login", window.location.origin);
+      const loginPath = adminPath("/login");
+      if (isAdminPublicPathname(here) && here !== loginPath) {
+        const login = new URL(loginPath, window.location.origin);
         login.searchParams.set("next", here);
         window.location.replace(login.toString());
         return new Promise<T>(() => {});

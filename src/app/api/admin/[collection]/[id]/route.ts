@@ -10,6 +10,11 @@ import {
   isCollection,
   pickFields,
 } from "@/lib/admin-collections";
+import {
+  deleteManagedMediaUrls,
+  deleteRemovedManagedMedia,
+  collectManagedMediaUrls,
+} from "@/lib/delete-record-media";
 
 type Params = { params: Promise<{ collection: string; id: string }> };
 
@@ -56,6 +61,9 @@ export async function PATCH(request: Request, { params }: Params) {
       });
     });
 
+    // احذف ملفات الميديا التي أُزيلت أو استُبدلت في التحديث
+    await deleteRemovedManagedMedia(existing, item);
+
     revalidateSite();
     return NextResponse.json({ item });
   } catch (err) {
@@ -87,6 +95,9 @@ export async function DELETE(request: Request, { params }: Params) {
     await withDbRetry((prisma) =>
       getDelegate(prisma, collection).delete({ where: { id } }),
     );
+
+    await deleteManagedMediaUrls(collectManagedMediaUrls(existing));
+
     revalidateSite();
     return NextResponse.json({ ok: true });
   } catch (err) {

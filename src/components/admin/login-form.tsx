@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sanitizeAdminNext } from "@/lib/safe-redirect";
+import { adminPath } from "@/lib/admin-base-path";
 
 export function LoginForm() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get("error") === "unconfigured") {
-      setError("لوحة التحكم غير مهيأة: اضبط ADMIN_API_TOKEN في ملف .env");
+      setError("لوحة التحكم غير مهيأة: اضبط ADMIN_API_TOKEN في ملف البيئة");
     }
   }, [searchParams]);
 
@@ -39,7 +40,7 @@ export function LoginForm() {
         method: "POST",
         body: JSON.stringify({ token }),
       });
-      router.replace(sanitizeAdminNext(searchParams.get("next"), "/admin"));
+      router.replace(sanitizeAdminNext(searchParams.get("next"), adminPath()));
       router.refresh();
     } catch (err) {
       setError(
@@ -64,7 +65,7 @@ export function LoginForm() {
           <CardContent className="space-y-5 px-8 py-6">
             <div className="space-y-2.5">
               <Label htmlFor="admin-token" className="text-base">
-                رمز الدخول
+                كلمة المرور
               </Label>
               <div className="relative">
                 <KeyRoundIcon className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { showFormResponseToast } from "@/components/admin/form-response-toast";
 import { SidebarMenuBadge } from "@/components/ui/sidebar";
+import { adminPath } from "@/lib/admin-base-path";
 import { cn } from "@/lib/utils";
 
 type NotificationItem = {
@@ -167,7 +168,7 @@ export function useAdminFormNotifications(enabled = true) {
           title,
           description,
           onView: () => {
-            router.push("/admin/form-responses");
+            router.push(adminPath("/form-responses"));
           },
         });
       } catch (err) {
@@ -184,10 +185,10 @@ export function useAdminFormNotifications(enabled = true) {
 
   useEffect(() => {
     if (!enabled) return;
-    if (pathname.startsWith("/admin/form-responses")) {
+    if (pathname.startsWith(adminPath("/form-responses"))) {
       void load({ showToast: false, markFormSeen: true });
     }
-    if (pathname.startsWith("/admin/customers")) {
+    if (pathname.startsWith(adminPath("/customers"))) {
       void load({ showToast: false, markCustomersSeen: true });
     }
   }, [enabled, pathname, load]);
@@ -197,8 +198,8 @@ export function useAdminFormNotifications(enabled = true) {
     function onRefresh() {
       void load({
         showToast: false,
-        markFormSeen: pathname.startsWith("/admin/form-responses"),
-        markCustomersSeen: pathname.startsWith("/admin/customers"),
+        markFormSeen: pathname.startsWith(adminPath("/form-responses")),
+        markCustomersSeen: pathname.startsWith(adminPath("/customers")),
       });
     }
     window.addEventListener("admin:form-notifications-refresh", onRefresh);

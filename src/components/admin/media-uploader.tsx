@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ImagePlusIcon, Loader2Icon, Trash2Icon, UploadIcon } from "lucide-react";
 import { AdminApiError } from "@/lib/admin-api";
+import { deleteAdminMedia } from "@/lib/admin-media-client";
 import { acceptAttribute, isVideoUrl, type MediaKind } from "@/lib/media-kinds";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,19 +66,6 @@ async function uploadMediaFile(
   }
 
   return data as { url: string; previewUrl?: string; warning?: string };
-}
-
-async function deleteMediaFile(url: string) {
-  const res = await fetch("/api/admin/upload", {
-    method: "DELETE",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
-  });
-  const data = (await res.json().catch(() => ({}))) as { message?: string };
-  if (!res.ok) {
-    throw new AdminApiError(data.message ?? `خطأ ${res.status}`, res.status);
-  }
 }
 
 export function MediaUploader({
@@ -195,7 +183,7 @@ export function MediaUploader({
     setDeleting(true);
     setError(null);
     try {
-      if (current) await deleteMediaFile(current);
+      if (current) await deleteAdminMedia(current);
       onChange("");
       setPreviewOverride(null);
       setWarning(null);

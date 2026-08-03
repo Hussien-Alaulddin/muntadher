@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  adminPath,
+  isAdminPublicPathname,
+} from "@/lib/admin-base-path";
 import { ADMIN_COOKIE } from "@/lib/admin-constants";
 import { verifyAdminSessionToken } from "@/lib/admin-session";
 
+/**
+ * حماية مسار اللوحة السري.
+ * المسار الحقيقي في App Router هو نفسه العلني (مثل /m-6769c0) —
+ * لا نعتمد على rewrite لأن Edge middleware على Hostinger غير موثوق.
+ */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!pathname.startsWith("/admin")) {
+  if (!isAdminPublicPathname(pathname)) {
     return NextResponse.next();
   }
 
@@ -17,21 +26,24 @@ export async function middleware(request: NextRequest) {
     Boolean(cookieToken) &&
     (await verifyAdminSessionToken(cookieToken, expected!));
 
-  if (pathname === "/admin/login") {
+  const loginPublic = adminPath("/login");
+  const homePublic = adminPath();
+
+  if (pathname === loginPublic) {
     if (hasSession) {
-      return NextResponse.redirect(new URL("/admin", request.url));
+      return NextResponse.redirect(new URL(homePublic, request.url));
     }
     return NextResponse.next();
   }
 
   if (!expected) {
     return NextResponse.redirect(
-      new URL("/admin/login?error=unconfigured", request.url),
+      new URL(`${loginPublic}?error=unconfigured`, request.url),
     );
   }
 
   if (!hasSession) {
-    const login = new URL("/admin/login", request.url);
+    const login = new URL(loginPublic, request.url);
     login.searchParams.set("next", pathname);
     return NextResponse.redirect(login);
   }
@@ -40,5 +52,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: [
+    "/m-6769c0",
+    "/m-6769c0/:path*",
+  ],
 };

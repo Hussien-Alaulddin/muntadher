@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Loader2Icon } from "lucide-react";
+import { isAdminPublicPathname } from "@/lib/admin-base-path";
 import { cn } from "@/lib/utils";
 
 /**
@@ -30,7 +31,7 @@ export function AdminPageTransition({ children }: { children: ReactNode }) {
       try {
         const url = new URL(href, window.location.href);
         if (url.origin !== window.location.origin) return;
-        if (!url.pathname.startsWith("/admin")) return;
+        if (!isAdminPublicPathname(url.pathname)) return;
         if (url.pathname === pathname) return;
         setPending(true);
       } catch {

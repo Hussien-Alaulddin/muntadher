@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { adminPath } from "@/lib/admin-base-path";
 import { ADMIN_COOKIE } from "@/lib/admin-constants";
 import { verifyAdminSessionToken } from "@/lib/admin-session";
 
@@ -10,7 +11,7 @@ import { verifyAdminSessionToken } from "@/lib/admin-session";
 export async function requireAdminPage() {
   const expected = process.env.ADMIN_API_TOKEN?.trim();
   if (!expected) {
-    redirect("/admin/login?error=unconfigured");
+    redirect(`${adminPath("/login")}?error=unconfigured`);
   }
 
   const token = (await cookies()).get(ADMIN_COOKIE)?.value;
@@ -18,6 +19,6 @@ export async function requireAdminPage() {
     Boolean(token) && (await verifyAdminSessionToken(token, expected));
 
   if (!ok) {
-    redirect("/admin/login");
+    redirect(adminPath("/login"));
   }
 }

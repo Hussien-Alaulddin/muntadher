@@ -3,6 +3,7 @@
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import type { ProjectGalleryItem, ProjectMetaItem } from "@/lib/content";
 import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
+import { deleteAdminMedia } from "@/lib/admin-media-client";
 import { PROJECT_CASE_IMAGE } from "@/lib/project-case-image";
 import { MediaUploader } from "@/components/admin/media-uploader";
 import { Button } from "@/components/ui/button";
@@ -212,7 +213,12 @@ export function GalleryListEditor({
                   size="icon-sm"
                   disabled={disabled}
                   aria-label="حذف الصورة"
-                  onClick={() => onChange(rows.filter((_, i) => i !== index))}
+                  onClick={() => {
+                    const removed = rows[index];
+                    onChange(rows.filter((_, i) => i !== index));
+                    const url = removed?.imageUrl?.trim();
+                    if (url) void deleteAdminMedia(url).catch(() => undefined);
+                  }}
                 >
                   <Trash2Icon />
                 </Button>
@@ -337,9 +343,12 @@ export function FilesListEditor({
                   variant="ghost"
                   size="icon-sm"
                   disabled={disabled}
-                  onClick={() =>
-                    onChange(rows.filter((_, i) => i !== index))
-                  }
+                  onClick={() => {
+                    const removed = rows[index];
+                    onChange(rows.filter((_, i) => i !== index));
+                    const url = removed?.url?.trim();
+                    if (url) void deleteAdminMedia(url).catch(() => undefined);
+                  }}
                 >
                   <Trash2Icon />
                 </Button>

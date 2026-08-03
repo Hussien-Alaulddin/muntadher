@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
+import { deleteRemovedManagedMedia } from "@/lib/delete-record-media";
 import { withDbRetry } from "@/lib/prisma";
 
 const settingsFields = [
@@ -80,14 +81,19 @@ export async function PATCH(request: Request) {
     const settingsData = pick(payload.settings ?? {}, settingsFields);
     const bannerData = pick(payload.banner ?? {}, bannerFields);
 
-    const [settings, banner] = await withDbRetry(async (prisma) => {
+    const [settings, banner, previous] = await withDbRetry(async (prisma) => {
+      const [prevSettings, prevBanner] = await Promise.all([
+        prisma.siteSettings.findUnique({ where: { id: "default" } }),
+        prisma.featuredBanner.findUnique({ where: { id: "default" } }),
+      ]);
+
       const nextSettings = Object.keys(settingsData).length
         ? await prisma.siteSettings.upsert({
             where: { id: "default" },
             create: { id: "default", ...settingsData },
             update: settingsData,
           })
-        : await prisma.siteSettings.findUnique({ where: { id: "default" } });
+        : prevSettings;
 
       const nextBanner = Object.keys(bannerData).length
         ? await prisma.featuredBanner.upsert({
@@ -95,10 +101,17 @@ export async function PATCH(request: Request) {
             create: { id: "default", ...bannerData },
             update: bannerData,
           })
-        : await prisma.featuredBanner.findUnique({ where: { id: "default" } });
+        : prevBanner;
 
-      return [nextSettings, nextBanner] as const;
+      return [nextSettings, nextBanner, { prevSettings, prevBanner }] as const;
     });
+
+    if (Object.keys(settingsData).length) {
+      await deleteRemovedManagedMedia(previous.prevSettings, settings);
+    }
+    if (Object.keys(bannerData).length) {
+      await deleteRemovedManagedMedia(previous.prevBanner, banner);
+    }
 
     revalidatePath("/");
     revalidatePath("/projects");

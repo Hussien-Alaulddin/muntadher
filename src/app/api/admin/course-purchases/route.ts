@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
+import { adminPath } from "@/lib/admin-base-path";
 import {
   createSignedMediaUrl,
   RECEIPT_SIGNED_URL_SECONDS,
@@ -144,7 +145,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ message: "الطلب غير موجود" }, { status: 404 });
     }
 
-    revalidatePath("/admin/course-purchases");
+    revalidatePath(adminPath("/course-purchases"));
 
     return NextResponse.json({
       item: {

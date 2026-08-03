@@ -47,7 +47,10 @@ export async function POST(request: Request) {
 
   const token = body?.token?.trim() ?? "";
   if (!timingSafeEqualString(token, expected)) {
-    return NextResponse.json({ message: "رمز الدخول غير صحيح" }, { status: 401 });
+    return NextResponse.json(
+      { message: "كلمة المرور غير صحيحة" },
+      { status: 401 },
+    );
   }
 
   const session = await createAdminSessionToken(expected);

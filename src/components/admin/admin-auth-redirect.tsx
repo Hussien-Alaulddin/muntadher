@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
+import { adminPath, isAdminPublicPathname } from "@/lib/admin-base-path";
 
 /** تحويل صريح للمتصفح — يعمل حتى لو فشل redirect() من السيرفر على Hostinger */
 export function AdminAuthRedirect() {
   useEffect(() => {
-    const login = new URL("/admin/login", window.location.origin);
+    const loginPath = adminPath("/login");
+    const login = new URL(loginPath, window.location.origin);
     const path = window.location.pathname;
-    if (path.startsWith("/admin") && path !== "/admin/login") {
+    if (isAdminPublicPathname(path) && path !== loginPath) {
       login.searchParams.set("next", path);
     }
     window.location.replace(login.toString());

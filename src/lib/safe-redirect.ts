@@ -2,6 +2,8 @@
  * يسمح فقط بمسارات نسبية داخل الموقع.
  * يرفض الروابط الخارجية و protocol-relative (//evil.com) لمنع open redirect.
  */
+import { adminPath, isAdminPublicPathname } from "@/lib/admin-base-path";
+
 export function sanitizeNext(
   value: string | null | undefined,
   fallback = "/products",
@@ -15,12 +17,13 @@ export function sanitizeNext(
   return trimmed;
 }
 
-/** مسارات لوحة التحكم فقط */
+/** مسارات لوحة التحكم العلنية فقط */
 export function sanitizeAdminNext(
   value: string | null | undefined,
-  fallback = "/admin",
+  fallback?: string,
 ): string {
-  const next = sanitizeNext(value, fallback);
-  if (!next.startsWith("/admin")) return fallback;
+  const safeFallback = fallback ?? adminPath();
+  const next = sanitizeNext(value, safeFallback);
+  if (!isAdminPublicPathname(next)) return safeFallback;
   return next;
 }

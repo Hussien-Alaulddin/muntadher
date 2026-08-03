@@ -29,6 +29,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { adminFetch } from "@/lib/admin-api";
+import { adminPath } from "@/lib/admin-base-path";
 import { invalidateAdminCache, peekAdminCache, setAdminCache } from "@/lib/admin-cache";
 import { AdminPageHeader } from "@/components/admin/admin-field";
 import { Badge } from "@/components/ui/badge";
@@ -392,25 +393,25 @@ export function AdminDashboard() {
       label: "مشاريع منشورة",
       value: `${formatNumber(kpis?.content.projectsPublished ?? 0)} / ${formatNumber(kpis?.content.projectsTotal ?? 0)}`,
       icon: FolderKanbanIcon,
-      href: "/admin/projects",
+      href: adminPath("/projects"),
     },
     {
       label: "دورات منشورة",
       value: formatNumber(kpis?.content.productsCore ?? 0),
       icon: GraduationCapIcon,
-      href: "/admin/courses",
+      href: adminPath("/courses"),
     },
     {
       label: "كتيبات منشورة",
       value: formatNumber(kpis?.content.productsResource ?? 0),
       icon: BookOpenIcon,
-      href: "/admin/booklets",
+      href: adminPath("/booklets"),
     },
     {
       label: "عناصر في السلة",
       value: formatNumber(kpis?.content.cartItems ?? 0),
       icon: ShoppingBagIcon,
-      href: "/admin/customers",
+      href: adminPath("/customers"),
     },
   ];
 
@@ -457,7 +458,7 @@ export function AdminDashboard() {
           title="العملاء"
           value={kpis?.customers.total ?? 0}
           hint={`${formatNumber(kpis?.customers.week ?? 0)} تسجيل هذا الأسبوع · ${formatNumber(kpis?.customers.located ?? 0)} بموقع معروف`}
-          href="/admin/customers"
+          href={adminPath("/customers")}
           icon={UsersIcon}
           delta={kpis?.customers.weekDelta}
           loading={showSkeleton}
@@ -466,7 +467,7 @@ export function AdminDashboard() {
           title="ردود الاستمارة"
           value={kpis?.forms.total ?? 0}
           hint={`${formatNumber(kpis?.forms.newCount ?? 0)} بانتظار المتابعة`}
-          href="/admin/form-responses"
+          href={adminPath("/form-responses")}
           icon={ClipboardListIcon}
           delta={kpis?.forms.weekDelta}
           loading={showSkeleton}
@@ -475,7 +476,7 @@ export function AdminDashboard() {
           title="إجمالي التحميلات"
           value={kpis?.downloads.total ?? 0}
           hint={`${formatNumber(kpis?.downloads.entitlementsWeek ?? 0)} صلاحية جديدة هذا الأسبوع`}
-          href="/admin/booklets"
+          href={adminPath("/booklets")}
           icon={DownloadIcon}
           loading={showSkeleton}
         />
@@ -483,7 +484,7 @@ export function AdminDashboard() {
           title="النشرة البريدية"
           value={kpis?.newsletter.total ?? 0}
           hint={`${formatNumber(kpis?.newsletter.week ?? 0)} مشترك هذا الأسبوع`}
-          href="/admin/settings"
+          href={adminPath("/settings")}
           icon={MailIcon}
           loading={showSkeleton}
         />
@@ -854,7 +855,7 @@ export function AdminDashboard() {
               <CardDescription>آخر التسجيلات</CardDescription>
             </div>
             <Button asChild variant="ghost" size="sm" className="gap-1">
-              <Link href="/admin/customers">
+              <Link href={adminPath("/customers")}>
                 الكل
                 <ArrowLeftIcon className="size-3.5" />
               </Link>
@@ -911,7 +912,7 @@ export function AdminDashboard() {
               <CardDescription>آخر ردود الاستمارة</CardDescription>
             </div>
             <Button asChild variant="ghost" size="sm" className="gap-1">
-              <Link href="/admin/form-responses">
+              <Link href={adminPath("/form-responses")}>
                 الكل
                 <ArrowLeftIcon className="size-3.5" />
               </Link>

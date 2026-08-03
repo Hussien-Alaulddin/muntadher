@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/admin-base-path";
 import type { CollectionName } from "@/lib/admin-collections";
 import { collections } from "@/lib/admin-collections";
 import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
@@ -359,17 +360,17 @@ for (const meta of Object.values(collectionMeta)) {
 }
 
 export const adminNav = [
-  { href: "/admin", label: "نظرة عامة", exact: true },
-  { href: "/admin/settings", label: "الإعدادات" },
-  { href: "/admin/customers", label: "بيانات العملاء" },
-  { href: "/admin/course-purchases", label: "طلبات شراء الدورات" },
-  { href: "/admin/form-questions", label: "أسئلة الاستمارة" },
-  { href: "/admin/form-responses", label: "ردود الاستمارة" },
+  { href: adminPath(), label: "نظرة عامة", exact: true },
+  { href: adminPath("/settings"), label: "الإعدادات" },
+  { href: adminPath("/customers"), label: "بيانات العملاء" },
+  { href: adminPath("/course-purchases"), label: "طلبات شراء الدورات" },
+  { href: adminPath("/form-questions"), label: "أسئلة الاستمارة" },
+  { href: adminPath("/form-responses"), label: "ردود الاستمارة" },
   ...Object.values(collectionMeta).map((c) => ({
-    href: `/admin/${c.name}`,
+    href: adminPath(`/${c.name}`),
     label: c.title,
   })),
-  { href: "/admin/reports", label: "التقارير" },
+  { href: adminPath("/reports"), label: "التقارير" },
 ] as const;
 
 export function emptyItem(collection: CollectionName): Record<string, unknown> {
