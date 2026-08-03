@@ -2,6 +2,8 @@
  * يشغّل prisma db push إذا توفر رابط MySQL
  * (MYSQL_DATABASE_URL أو DATABASE_URL).
  */
+require("./load-persistent-env");
+
 const { execSync } = require("child_process");
 
 function resolveMysqlUrl() {

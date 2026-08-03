@@ -11,6 +11,8 @@
  *   node scripts/with-mysql-url.js prisma generate
  *   node scripts/with-mysql-url.js next build
  */
+require("./load-persistent-env");
+
 const { spawnSync } = require("child_process");
 
 function resolveMysqlUrl() {
