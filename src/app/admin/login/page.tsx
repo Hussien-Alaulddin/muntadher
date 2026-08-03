@@ -6,7 +6,7 @@ export default function AdminLoginPage() {
     <main className="flex min-h-svh items-center justify-center bg-background p-6">
       <Suspense
         fallback={
-          <div className="h-72 w-full max-w-md animate-pulse rounded-xl bg-muted" />
+          <div className="h-80 w-full max-w-xl animate-pulse rounded-xl bg-muted" />
         }
       >
         <LoginForm />

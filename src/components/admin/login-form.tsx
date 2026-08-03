@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -52,26 +51,23 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
-      <Card className="w-full max-w-md shadow-sm">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">
+    <div className="flex w-full max-w-xl items-center justify-center px-4">
+      <Card className="w-full shadow-sm">
+        <CardHeader className="space-y-4 px-8 pt-10 pb-2 text-center">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground">
             م
           </div>
-          <div>
-            <CardTitle className="text-2xl">لوحة التحكم</CardTitle>
-            <CardDescription className="mt-1.5">
-              أدخل رمز الدخول المضبوط في ملف البيئة للمتابعة.
-            </CardDescription>
-          </div>
+          <CardTitle className="text-3xl tracking-tight">لوحة التحكم</CardTitle>
         </CardHeader>
 
         <form onSubmit={onSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="admin-token">رمز الدخول</Label>
+          <CardContent className="space-y-5 px-8 py-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="admin-token" className="text-base">
+                رمز الدخول
+              </Label>
               <div className="relative">
-                <KeyRoundIcon className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <KeyRoundIcon className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="admin-token"
                   type="password"
@@ -79,7 +75,7 @@ export function LoginForm() {
                   autoComplete="current-password"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="ps-9"
+                  className="h-12 ps-10 text-base"
                   dir="ltr"
                   required
                 />
@@ -89,10 +85,10 @@ export function LoginForm() {
             {error ? <AdminNotice tone="error">{error}</AdminNotice> : null}
           </CardContent>
 
-          <CardFooter>
+          <CardFooter className="px-8 pb-10">
             <Button
               type="submit"
-              className="w-full"
+              className="h-12 w-full text-base"
               size="lg"
               disabled={loading || !token.trim()}
             >
