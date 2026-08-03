@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { primaryButtonClass } from "@/components/ui";
 
 export default function NotFound() {
   return (
@@ -27,7 +26,7 @@ export default function NotFound() {
         </div>
         <Link
           href="/"
-          className={`${primaryButtonClass} mt-2 min-h-11 px-6 py-2.5 text-small`}
+          className="mt-2 inline-flex min-h-11 items-center justify-center rounded-[9px] bg-primary px-6 py-2.5 text-small text-primary-foreground transition-colors duration-200 hover:bg-primary/85"
         >
           Back to home
         </Link>

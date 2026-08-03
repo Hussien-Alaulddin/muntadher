@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { KeyRoundIcon, Loader2Icon } from "lucide-react";
+import {
+  EyeIcon,
+  EyeOffIcon,
+  KeyRoundIcon,
+  Loader2Icon,
+} from "lucide-react";
 import { adminFetch, AdminApiError } from "@/lib/admin-api";
 import { AdminNotice } from "@/components/admin/admin-field";
 import { Button } from "@/components/ui/button";
@@ -24,6 +29,7 @@ export function LoginForm() {
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showToken, setShowToken] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("error") === "unconfigured") {
@@ -58,25 +64,42 @@ export function LoginForm() {
           <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground">
             م
           </div>
-          <CardTitle className="text-3xl tracking-tight">لوحة التحكم</CardTitle>
+          <div className="space-y-1">
+            <CardTitle className="text-3xl tracking-tight">لوحة التحكم</CardTitle>
+            <p className="text-lg text-muted-foreground">منتظر</p>
+          </div>
         </CardHeader>
 
         <form onSubmit={onSubmit}>
           <CardContent className="space-y-5 px-8 py-6">
             <div className="space-y-2.5">
               <Label htmlFor="admin-token" className="text-base">
-                كلمة المرور
+                ادخل مفتاح الدخول
               </Label>
               <div className="relative">
-                <KeyRoundIcon className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <div className="absolute start-3 top-1/2 z-10 flex -translate-y-1/2 items-center gap-1.5">
+                  <KeyRoundIcon className="size-4 shrink-0 text-muted-foreground" />
+                  <button
+                    type="button"
+                    onClick={() => setShowToken((v) => !v)}
+                    className="rounded-md p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label={showToken ? "إخفاء مفتاح الدخول" : "إظهار مفتاح الدخول"}
+                  >
+                    {showToken ? (
+                      <EyeOffIcon className="size-4" />
+                    ) : (
+                      <EyeIcon className="size-4" />
+                    )}
+                  </button>
+                </div>
                 <Input
                   id="admin-token"
-                  type="password"
+                  type={showToken ? "text" : "password"}
                   autoFocus
                   autoComplete="current-password"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="h-12 ps-10 text-base"
+                  className="h-12 ps-16 text-base"
                   dir="ltr"
                   required
                 />
