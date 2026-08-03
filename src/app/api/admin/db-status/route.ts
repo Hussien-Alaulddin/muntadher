@@ -1,11 +1,36 @@
 import { NextResponse } from "next/server";
+import { existsSync, readdirSync } from "fs";
+import path from "path";
 import { checkAdmin } from "@/lib/admin-auth";
 import { isSqliteDatabase } from "@/lib/db-dialect";
+import {
+  getMediaRoot,
+  preferLocalMediaStorage,
+  publicMediaRootDir,
+  privateMediaRootDir,
+} from "@/lib/media-paths";
+import { isSupabaseStorageConfigured } from "@/lib/supabase-admin";
 import { getPrisma, resetPrisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-/** فحص اتصال قاعدة البيانات للتشخيص من لوحة التحكم */
+function listTopEntries(dir: string) {
+  try {
+    if (!existsSync(dir)) return { exists: false, entries: [] as string[] };
+    return {
+      exists: true,
+      entries: readdirSync(dir).slice(0, 40),
+    };
+  } catch (error) {
+    return {
+      exists: false,
+      entries: [] as string[],
+      error: error instanceof Error ? error.message : "تعذّر القراءة",
+    };
+  }
+}
+
+/** فحص اتصال قاعدة البيانات + مسار التخزين للتشخيص من لوحة التحكم */
 export async function GET(request: Request) {
   const denied = await checkAdmin(request);
   if (denied) return denied;
@@ -37,6 +62,23 @@ export async function GET(request: Request) {
     /* ignore */
   }
 
+  const mediaRoot = getMediaRoot();
+  const publicRoot = publicMediaRootDir();
+  const privateRoot = privateMediaRootDir();
+  const storage = {
+    preferLocal: preferLocalMediaStorage(),
+    mediaRootEnv: process.env.MEDIA_ROOT?.trim() || null,
+    mediaRootResolved: mediaRoot,
+    publicRoot,
+    privateRoot,
+    cwd: process.cwd(),
+    home: process.env.HOME || null,
+    supabaseConfigured: isSupabaseStorageConfigured(),
+    mediaRootListing: mediaRoot ? listTopEntries(mediaRoot) : null,
+    publicRootListing: listTopEntries(publicRoot),
+    projectsListing: listTopEntries(path.join(publicRoot, "projects")),
+  };
+
   await resetPrisma();
   const prisma = getPrisma();
   if (!prisma) {
@@ -48,6 +90,7 @@ export async function GET(request: Request) {
       db,
       user,
       hasMysqlEnv: Boolean(process.env.MYSQL_DATABASE_URL?.trim()),
+      storage,
     });
   }
 
@@ -60,9 +103,9 @@ export async function GET(request: Request) {
       );
       tableNames = tables.map((row) => row.name).filter(Boolean);
     } else {
-      const tables = await prisma.$queryRawUnsafe<Array<Record<string, string>>>(
-        "SHOW TABLES",
-      );
+      const tables = await prisma.$queryRawUnsafe<
+        Array<Record<string, string>>
+      >("SHOW TABLES");
       tableNames = tables.map((row) => Object.values(row)[0]).filter(Boolean);
     }
     return NextResponse.json({
@@ -77,6 +120,7 @@ export async function GET(request: Request) {
       hasMysqlEnv: Boolean(process.env.MYSQL_DATABASE_URL?.trim()),
       tableCount: tableNames.length,
       tables: tableNames,
+      storage,
     });
   } catch (error) {
     return NextResponse.json(
@@ -88,6 +132,7 @@ export async function GET(request: Request) {
         db,
         user,
         hasMysqlEnv: Boolean(process.env.MYSQL_DATABASE_URL?.trim()),
+        storage,
       },
       { status: 503 },
     );

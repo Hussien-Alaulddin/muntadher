@@ -14,10 +14,23 @@ function isSafeRelativeKey(key: string): boolean {
  * مثال: /home/u908955624/media
  *
  * محلياً إن لم يُضبط: public/uploads و storage/private داخل المشروع.
+ * إن وُضع مسار نسبي يُحلّ بالنسبة لـ HOME حتى لا تُكتب الملفات داخل .builds.
  */
 export function getMediaRoot(): string | null {
   const root = process.env.MEDIA_ROOT?.trim();
-  return root ? path.resolve(root) : null;
+  if (!root) return null;
+
+  if (path.isAbsolute(root)) {
+    return path.resolve(root);
+  }
+
+  // مسار نسبي مثل "media" → /home/USER/media وليس مجلد النشر
+  const home = process.env.HOME?.trim();
+  if (home) {
+    return path.resolve(home, root);
+  }
+
+  return path.resolve(root);
 }
 
 /** تفضيل القرص المحلي حتى لو بقيت مفاتيح Supabase في البيئة */
