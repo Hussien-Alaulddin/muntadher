@@ -115,9 +115,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
-  const [sessionOk, setSessionOk] = useState<boolean | null>(null);
   const { formCount: newFormCount, customerCount: newCustomerCount } =
-    useAdminFormNotifications(sessionOk === true);
+    useAdminFormNotifications(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,20 +126,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
           credentials: "same-origin",
           cache: "no-store",
         });
-        if (cancelled) return;
-        if (!res.ok) {
-          const login = new URL("/admin/login", window.location.origin);
-          if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-            login.searchParams.set("next", pathname);
-          }
-          window.location.replace(login.toString());
-          return;
+        if (cancelled || res.ok) return;
+        const login = new URL("/admin/login", window.location.origin);
+        if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+          login.searchParams.set("next", pathname);
         }
-        setSessionOk(true);
+        window.location.replace(login.toString());
       } catch {
-        if (!cancelled) {
-          window.location.replace("/admin/login");
-        }
+        if (!cancelled) window.location.replace("/admin/login");
       }
     })();
     return () => {
@@ -149,10 +142,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (sessionOk !== true) return;
     const timer = window.setTimeout(() => prefetchAdminNav(), 50);
     return () => window.clearTimeout(timer);
-  }, [sessionOk]);
+  }, []);
 
   async function logout() {
     setLoggingOut(true);
@@ -163,14 +155,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
     } finally {
       setLoggingOut(false);
     }
-  }
-
-  if (sessionOk !== true) {
-    return (
-      <div className="flex min-h-svh items-center justify-center bg-background text-sm text-muted-foreground">
-        جاري التحقق من الجلسة…
-      </div>
-    );
   }
 
   return (
