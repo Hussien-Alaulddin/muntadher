@@ -1,20 +1,25 @@
 /**
  * يحمّل متغيرات البيئة من ملف ثابت خارج مجلد نشر GitHub.
  * Hostinger أحياناً يعيد متغيرات اللوحة للقيم القديمة بعد كل Deploy.
- *
- * المسارات المجربة بالترتيب:
- * - HOSTINGER_ENV_FILE
- * - /home/u908955624/muntadhar.env
- * - ~/muntadhar.env
  */
 const fs = require("fs");
 const path = require("path");
 
-const CANDIDATES = [
-  process.env.HOSTINGER_ENV_FILE,
-  "/home/u908955624/muntadhar.env",
-  process.env.HOME ? path.join(process.env.HOME, "muntadhar.env") : null,
-].filter(Boolean);
+function candidates() {
+  const home = process.env.HOME || "/home/u908955624";
+  const domainRoot = path.join(home, "domains", "muntadhar.studio");
+  const list = [
+    process.env.HOSTINGER_ENV_FILE,
+    path.join(domainRoot, "muntadhar.env"),
+    path.join(home, "muntadhar.env"),
+    path.join(home, "media", "..", "muntadhar.env"),
+    // من داخل .builds/source/repository اصعد إلى جذر الدومين
+    path.resolve(process.cwd(), "../../../muntadhar.env"),
+    path.resolve(process.cwd(), "../../muntadhar.env"),
+    path.resolve(process.cwd(), "../muntadhar.env"),
+  ];
+  return [...new Set(list.filter(Boolean).map((p) => path.resolve(p)))];
+}
 
 function stripQuotes(value) {
   if (
@@ -35,13 +40,12 @@ function parseEnvFile(content) {
     const key = trimmed.slice(0, eq).trim();
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
     const value = stripQuotes(trimmed.slice(eq + 1).trim());
-    // الملف الدائم هو المصدر الصحيح — يتجاوز قيم اللوحة القديمة
     process.env[key] = value;
   }
 }
 
 function loadPersistentEnv() {
-  for (const file of CANDIDATES) {
+  for (const file of candidates()) {
     try {
       if (!fs.existsSync(file)) continue;
       parseEnvFile(fs.readFileSync(file, "utf8"));
@@ -56,7 +60,13 @@ function loadPersistentEnv() {
     }
   }
   console.warn(
-    "[load-persistent-env] لم يُعثر على muntadhar.env — أنشئه في /home/u908955624/muntadhar.env",
+    "[load-persistent-env] لم يُعثر على muntadhar.env — المسار المفضّل:",
+    path.join(
+      process.env.HOME || "/home/u908955624",
+      "domains",
+      "muntadhar.studio",
+      "muntadhar.env",
+    ),
   );
   return null;
 }
