@@ -196,7 +196,8 @@ export function GalleryListEditor({
 
       {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed px-3 py-4 text-sm text-muted-foreground">
-          لا توجد صور بعد. أضف صوراً بمقاس {PROJECT_CASE_IMAGE.label}.
+          لا توجد صور بعد. اضغط «إضافة عنصر» ثم ارفع صورة بمقاس{" "}
+          {PROJECT_CASE_IMAGE.label}.
         </p>
       ) : (
         <div className="space-y-3">
@@ -271,7 +272,7 @@ export function GalleryListEditor({
         }
       >
         <PlusIcon />
-        إضافة صورة
+        إضافة عنصر
       </Button>
     </div>
   );

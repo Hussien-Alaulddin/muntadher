@@ -4,11 +4,6 @@ import { emptyCourseDetail } from "@/lib/course-detail";
 import { emptyCourseWatchContent } from "@/lib/course-watch";
 import { PROJECT_CASE_IMAGE } from "@/lib/project-case-image";
 
-const projectCaseFixedSize = {
-  width: PROJECT_CASE_IMAGE.width,
-  height: PROJECT_CASE_IMAGE.height,
-  tolerance: PROJECT_CASE_IMAGE.tolerance,
-} as const;
 export type FieldType =
   | "text"
   | "textarea"
@@ -62,12 +57,10 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       { key: "title", label: "العنوان", type: "text", required: true },
       { key: "slug", label: "المعرّف (slug)", type: "text", required: true, hint: "يظهر في الرابط: /projects/slug — لا تغيّره بعد النشر إن أمكن" },
       { key: "category", label: "التصنيف", type: "text", required: true },
-      { key: "imageUrl", label: "صورة البطاقة", type: "media", mediaAccept: "image", mediaFolder: "projects" },
+      { key: "imageUrl", label: "صورة البطاقة", type: "media", mediaAccept: "image", mediaFolder: "projects", hint: "تظهر في قائمة المشاريع فقط" },
       { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
       { key: "published", label: "منشور", type: "boolean" },
       { key: "description", label: "الوصف", type: "textarea" },
-      { key: "logoImageUrl", label: "صورة الشعار", type: "media", mediaAccept: "image", mediaFolder: "projects", mediaFixedSize: projectCaseFixedSize, hint: `تُعرض ضمن شريط المشروع بمقاس ${PROJECT_CASE_IMAGE.label}` },
-      { key: "coverImageUrl", label: "صورة الغلاف", type: "media", mediaAccept: "image", mediaFolder: "projects", mediaFixedSize: projectCaseFixedSize, hint: `مقاس ثابت ${PROJECT_CASE_IMAGE.label} — أول صورة في شريط بيهانس` },
       {
         key: "meta",
         label: "بطاقات المعلومات",
@@ -76,15 +69,9 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       },
       {
         key: "brandGallery",
-        label: "معرض عناصر الهوية",
+        label: "صور المشروع",
         type: "gallery-list",
-        hint: `صور عناصر الهوية بمقاس ${PROJECT_CASE_IMAGE.label}`,
-      },
-      {
-        key: "applicationGallery",
-        label: "معرض التطبيقات",
-        type: "gallery-list",
-        hint: `صور التطبيقات بمقاس ${PROJECT_CASE_IMAGE.label}`,
+        hint: `ارفع صور دراسة الحالة بمقاس ${PROJECT_CASE_IMAGE.label}. اضغط «إضافة عنصر» لكل صورة حتى تكتمل كل صور المشروع.`,
       },
       { key: "externalCaseStudyUrl", label: "رابط دراسة حالة خارجية", type: "url" },
       { key: "externalCaseStudyLabel", label: "نص زر الدراسة الخارجية", type: "text" },

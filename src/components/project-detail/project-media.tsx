@@ -38,7 +38,7 @@ function CaseFrame({ frame }: { frame: StackFrame }) {
             fill
             sizes="100vw"
             className={frame.fit === "contain" ? "object-contain" : "object-cover"}
-            priority={frame.key === "cover" || frame.key === "logo"}
+            priority={frame.key === "case-0"}
           />
         )
       ) : (
@@ -54,57 +54,20 @@ function CaseFrame({ frame }: { frame: StackFrame }) {
  */
 export function ProjectCaseStudyStack({
   title,
-  logoImageUrl,
-  coverImageUrl,
-  brandGallery,
-  applicationGallery,
+  gallery,
 }: {
   title: string;
-  logoImageUrl: string | null;
-  coverImageUrl: string | null;
-  brandGallery: ProjectGalleryItem[];
-  applicationGallery: ProjectGalleryItem[];
+  gallery: ProjectGalleryItem[];
 }) {
-  const frames: StackFrame[] = [];
-
-  if (logoImageUrl) {
-    frames.push({
-      key: "logo",
-      url: logoImageUrl,
-      alt: `شعار ${title}`,
-      fit: "contain",
-    });
-  }
-
-  if (coverImageUrl) {
-    frames.push({
-      key: "cover",
-      url: coverImageUrl,
-      alt: `غلاف ${title}`,
-      fit: "cover",
-      video: isVideoUrl(coverImageUrl),
-    });
-  }
-
-  brandGallery.forEach((item, index) => {
-    if (!item.imageUrl) return;
-    frames.push({
-      key: `brand-${index}`,
+  const frames: StackFrame[] = gallery
+    .filter((item) => Boolean(item.imageUrl))
+    .map((item, index) => ({
+      key: `case-${index}`,
       url: item.imageUrl,
-      alt: item.caption?.trim() || `عنصر هوية ${title} ${index + 1}`,
-      fit: "cover",
-    });
-  });
-
-  applicationGallery.forEach((item, index) => {
-    if (!item.imageUrl) return;
-    frames.push({
-      key: `app-${index}`,
-      url: item.imageUrl,
-      alt: item.caption?.trim() || `تطبيق هوية ${title} ${index + 1}`,
-      fit: "cover",
-    });
-  });
+      alt: item.caption?.trim() || `${title} — صورة ${index + 1}`,
+      fit: "cover" as const,
+      video: item.imageUrl ? isVideoUrl(item.imageUrl) : false,
+    }));
 
   if (frames.length === 0) return null;
 

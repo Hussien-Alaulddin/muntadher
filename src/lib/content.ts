@@ -132,10 +132,8 @@ export type ProjectDetailView = {
   category: string;
   description: string | null;
   meta: ProjectMetaItem[];
-  logoImageUrl: string | null;
-  coverImageUrl: string | null;
-  brandGallery: ProjectGalleryItem[];
-  applicationGallery: ProjectGalleryItem[];
+  /** صور دراسة الحالة بالترتيب — مصدر واحد للعرض */
+  gallery: ProjectGalleryItem[];
   externalCaseStudyUrl: string | null;
   externalCaseStudyLabel: string | null;
 };
@@ -766,6 +764,46 @@ function parseGallery(value: unknown): ProjectGalleryItem[] {
     }));
 }
 
+function buildProjectCaseGallery(input: {
+  logoImageUrl?: string | null;
+  coverImageUrl?: string | null;
+  brandGallery: ProjectGalleryItem[];
+  applicationGallery: ProjectGalleryItem[];
+}): ProjectGalleryItem[] {
+  const frames: ProjectGalleryItem[] = [];
+  const seen = new Set<string>();
+
+  function push(item: ProjectGalleryItem) {
+    const url = item.imageUrl?.trim();
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    frames.push({ ...item, imageUrl: url });
+  }
+
+  // المشاريع الجديدة: صور brandGallery فقط تكفي
+  // المشاريع القديمة: ندمج الشعار/الغلاف/المعارض دون تكرار
+  if (input.logoImageUrl) {
+    push({
+      imageUrl: input.logoImageUrl,
+      caption: null,
+      layout: "full",
+      aspect: "3240:1350",
+    });
+  }
+  if (input.coverImageUrl) {
+    push({
+      imageUrl: input.coverImageUrl,
+      caption: null,
+      layout: "full",
+      aspect: "3240:1350",
+    });
+  }
+  for (const item of input.brandGallery) push(item);
+  for (const item of input.applicationGallery) push(item);
+
+  return frames;
+}
+
 function placeholderProjectDetail(slug: string): ProjectDetailView | null {
   const project = projectsPlaceholder.find((item) => item.slug === slug);
   if (!project) return null;
@@ -777,10 +815,10 @@ function placeholderProjectDetail(slug: string): ProjectDetailView | null {
     category: project.category,
     description: project.description,
     meta: project.meta ?? [],
-    logoImageUrl: null,
-    coverImageUrl: null,
-    brandGallery: projectGalleryPlaceholder.brand,
-    applicationGallery: projectGalleryPlaceholder.application,
+    gallery: buildProjectCaseGallery({
+      brandGallery: projectGalleryPlaceholder.brand,
+      applicationGallery: projectGalleryPlaceholder.application,
+    }),
     externalCaseStudyUrl: project.externalCaseStudyUrl ?? null,
     externalCaseStudyLabel: project.externalCaseStudyLabel ?? null,
   };
@@ -796,7 +834,7 @@ export type ProjectDetailPageContent = {
 export const getProjectDetailPageContent = cache(
   async (slug: string): Promise<ProjectDetailPageContent | null> =>
     // مفتاح كاش محدّث لكسر نتائج null القديمة بعد انقطاع الشبكة
-    cached(["project-detail-v3", slug], () => loadProjectDetailPageContent(slug)),
+    cached(["project-detail-v4", slug], () => loadProjectDetailPageContent(slug)),
 );
 
 async function loadProjectDetailPageContent(
@@ -835,6 +873,22 @@ async function loadProjectDetailPageContent(
 
     const brandGallery = parseGallery(project.brandGallery);
     const applicationGallery = parseGallery(project.applicationGallery);
+    const gallery = buildProjectCaseGallery({
+      logoImageUrl: project.logoImageUrl,
+      coverImageUrl: project.coverImageUrl,
+      brandGallery:
+        brandGallery.length > 0
+          ? brandGallery
+          : isDemoContentEnabled
+            ? projectGalleryPlaceholder.brand
+            : [],
+      applicationGallery:
+        applicationGallery.length > 0
+          ? applicationGallery
+          : isDemoContentEnabled && brandGallery.length === 0
+            ? projectGalleryPlaceholder.application
+            : [],
+    });
 
     return {
       settings: mapSettings(settings),
@@ -846,20 +900,7 @@ async function loadProjectDetailPageContent(
         category: project.category,
         description: project.description,
         meta: parseMeta(project.meta),
-        logoImageUrl: project.logoImageUrl,
-        coverImageUrl: project.coverImageUrl ?? project.imageUrl,
-        brandGallery:
-          brandGallery.length > 0
-            ? brandGallery
-            : isDemoContentEnabled
-              ? projectGalleryPlaceholder.brand
-              : [],
-        applicationGallery:
-          applicationGallery.length > 0
-            ? applicationGallery
-            : isDemoContentEnabled
-              ? projectGalleryPlaceholder.application
-              : [],
+        gallery,
         externalCaseStudyUrl: project.externalCaseStudyUrl,
         externalCaseStudyLabel: project.externalCaseStudyLabel,
       },
