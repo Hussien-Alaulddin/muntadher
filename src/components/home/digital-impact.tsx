@@ -3,26 +3,13 @@ import type { DigitalImpactView } from "@/lib/content";
 import { sections } from "@/lib/fixed-content";
 import { CountUpValue } from "@/components/count-up";
 import { GlobeIcon, PulseIcon, socialIconMap } from "@/components/icons";
+import { platformIconKeys } from "@/lib/social-platforms";
 import { Section, SectionHeader } from "@/components/ui";
 
-const platformIconKeys: Record<string, keyof typeof socialIconMap> = {
-  انستجرام: "instagram",
-  instagram: "instagram",
-  لينكدإن: "linkedin",
-  linkedin: "linkedin",
-  تيليجرام: "telegram",
-  telegram: "telegram",
-  بيهانس: "behance",
-  behance: "behance",
-  بينترست: "pinterest",
-  pinterest: "pinterest",
-  ثريدز: "threads",
-  threads: "threads",
-};
-
 function platformIcon(platform: string) {
-  const key = platformIconKeys[platform.trim().toLowerCase()] ??
-    platformIconKeys[platform.trim()];
+  const trimmed = platform.trim();
+  const key =
+    platformIconKeys[trimmed.toLowerCase()] ?? platformIconKeys[trimmed];
   return key ? socialIconMap[key] : GlobeIcon;
 }
 

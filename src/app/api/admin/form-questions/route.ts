@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
+import { clampOrder } from "@/lib/admin-order";
 import { withDbRetry } from "@/lib/prisma";
 import { projectFormQuestionsSeed } from "@/lib/project-form";
 
@@ -75,8 +76,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const item = await withDbRetry((db) =>
-      db.projectFormQuestion.create({
+    const item = await withDbRetry(async (db) => {
+      const count = await db.projectFormQuestion.count();
+      return db.projectFormQuestion.create({
         data: {
           key,
           heading,
@@ -84,11 +86,11 @@ export async function POST(request: Request) {
           type,
           required: Boolean(body.required ?? true),
           options: asOptions(body.options) ?? undefined,
-          order: Number(body.order) || 1,
+          order: clampOrder(body.order, count + 1),
           enabled: body.enabled !== false,
         },
-      }),
-    );
+      });
+    });
 
     return NextResponse.json({
       item: { ...item, options: asOptions(item.options) },

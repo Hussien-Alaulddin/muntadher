@@ -298,9 +298,9 @@ export function MediaUploader({
       </div>
 
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
-      {fixedSize ? (
+      {fixedSize && !hint ? (
         <p className="text-xs text-muted-foreground">
-          المقاس الثابت للرفع: {fixedSize.width} × {fixedSize.height} بكسل
+          المقاس المطلوب: {fixedSize.width} × {fixedSize.height} بكسل
           (نسبة {fixedSize.width}:{fixedSize.height}).
         </p>
       ) : null}

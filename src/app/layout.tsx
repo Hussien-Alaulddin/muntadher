@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google";
 import { DirectionProvider } from "@/components/ui/direction";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getSiteChrome } from "@/lib/content";
 import "./globals.css";
 
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
@@ -18,11 +19,23 @@ const tajawal = Tajawal({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "منتظر | مُصمّم هُويّات بصريّة",
-  description:
-    "اعمل على تحويل العلامة الى قصة، والقصة الى هُويّة بصريّة، من خلال منهجية تعتمد على بناء استراتيجي للعلامة",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { settings } = await getSiteChrome();
+  const mark = settings.brandMarkUrl?.trim();
+
+  return {
+    title: `${settings.siteName || "منتظر"} | ${settings.siteTagline || "مُصمّم هُويّات بصريّة"}`,
+    description:
+      "اعمل على تحويل العلامة الى قصة، والقصة الى هُويّة بصريّة، من خلال منهجية تعتمد على بناء استراتيجي للعلامة",
+    icons: mark
+      ? {
+          icon: [{ url: mark }],
+          apple: [{ url: mark }],
+          shortcut: mark,
+        }
+      : undefined,
+  };
+}
 
 export default function RootLayout({
   children,

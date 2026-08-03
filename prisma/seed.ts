@@ -27,14 +27,45 @@ const seedDemo = process.env.SEED_DEMO !== "off";
 async function main() {
   await prisma.siteSettings.upsert({
     where: { id: "default" },
-    create: { id: "default" },
+    create: {
+      id: "default",
+      contactEmail: "hello@muntadhar.studio",
+      contactPhone: "+964 770 123 4567",
+      contactLocation: "بغداد، العراق",
+    },
     update: {},
   });
+
+  const current = await prisma.siteSettings.findUnique({
+    where: { id: "default" },
+  });
+  if (current) {
+    await prisma.siteSettings.update({
+      where: { id: "default" },
+      data: {
+        ...(current.contactEmail ? {} : { contactEmail: "hello@muntadhar.studio" }),
+        ...(current.contactPhone ? {} : { contactPhone: "+964 770 123 4567" }),
+        ...(current.contactLocation
+          ? {}
+          : { contactLocation: "بغداد، العراق" }),
+      },
+    });
+  }
 
   await prisma.featuredBanner.upsert({
     where: { id: "default" },
     create: seedDemo ? { id: "default", ...demoBanner } : { id: "default" },
-    update: {},
+    update: seedDemo
+      ? {
+          enabled: demoBanner.enabled,
+          badgeLabel: demoBanner.badgeLabel,
+          title: demoBanner.title,
+          contentType: demoBanner.contentType,
+          ctaLabel: demoBanner.ctaLabel,
+          href: demoBanner.href,
+          imageUrl: demoBanner.imageUrl,
+        }
+      : {},
   });
 
   for (const [index, stat] of statsPlaceholder.entries()) {

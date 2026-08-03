@@ -9,7 +9,7 @@ export default async function ProductsPage() {
 
   return (
     <main>
-      <ProductsHero />
+      <ProductsHero brandMarkUrl={content.settings.brandMarkUrl} />
       <ProductsArchive
         corePrograms={content.corePrograms}
         resources={content.resources}

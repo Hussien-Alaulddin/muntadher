@@ -17,16 +17,35 @@ model SiteSettings {
 
   designerName String @default("منتظر")
   siteName     String @default("منتظر")
+  /// الجملة بعد الاسم في عنوان تبويب المتصفح (مثلاً: مُصمّم هُويّات بصريّة)
+  siteTagline  String @default("مُصمّم هُويّات بصريّة")
   avatarUrl    String?
   heroImageUrl String?
+  /// لوكو مصغّر — أيقونة التبويب وبدل نجمة الوسوم في الموقع
+  brandMarkUrl String?
+  /// لوكو مستطيل صغير بجانب الأفاتار في شريط التنقّل (بدل اسم المصمم نصاً)
+  navbarLogoUrl String?
+  /// لوكو كامل للفوتر
+  footerLogoUrl String?
+  /// وصف قصير تحت لوكو الفوتر
+  footerDescription String? @db.Text
 
   /// مؤشر حالة التوفّر في البادج العائم بالهيرو (نص البادج ثابت بالكود)
   availableForWork Boolean @default(true)
 
   contactEmail          String?
+  /// رقم الموبايل الظاهر في الفوتر
+  contactPhone          String?
+  /// الموقع الجغرافي الظاهر في الفوتر
+  contactLocation       String?
   whatsappUrl           String?
+  /// روابط أيقونات التواصل في الفوتر (فارغة حتى يملأها المصمم)
+  instagramUrl          String?
+  facebookUrl           String?
+  telegramUrl           String?
+  /// مهجور — الاستمارة الداخلية /project-request ثابتة
   projectRequestFormUrl String?
-  /// رابط بورتفوليو خارجي اختياري (مثل Behance) يظهر كأيقونة بجانب زر طلب المشروع في صفحة الأعمال
+  /// مهجور — لم يعد يُعرض في الواجهة
   externalPortfolioUrl  String?
 
   /// أرقام التحويل المالي لشراء الدورات
@@ -231,14 +250,20 @@ model CoursePurchaseRequest {
   @@map("course_purchase_requests")
 }
 
-/// بانر "جديد" — قسم اختياري بالكامل، لا يظهر إلا لو فعّله المصمم
+/// بانر مميز في الرئيسية — قسم اختياري بالكامل، لا يظهر إلا لو فعّله المصمم
 model FeaturedBanner {
   id      String  @id @default("default")
   enabled Boolean @default(false)
 
-  title       String?
+  /// شارة مثل «جديد»
+  badgeLabel  String?
+  /// وصف فرعي فوق العنوان
   contentType String?
+  title       String?
+  /// نص رابط الدعوة للإجراء
+  ctaLabel    String?
   href        String?
+  imageUrl    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

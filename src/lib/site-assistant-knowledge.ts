@@ -110,11 +110,9 @@ async function loadExtras(): Promise<{
   }
 }
 
-async function buildPublicSiteKnowledge(
-  projectRequestFormUrl: string | null,
-): Promise<string> {
+async function buildPublicSiteKnowledge(): Promise<string> {
   const lines: string[] = [];
-  const projectHref = projectRequestHref(projectRequestFormUrl);
+  const projectHref = projectRequestHref();
 
   pushLine(lines, "## نظرة عامة");
   pushLine(lines, `- التخصص: ${hero.badge}`);
@@ -161,9 +159,6 @@ async function buildPublicSiteKnowledge(
     }
     if (settings.whatsappUrl) {
       pushLine(lines, `- واتساب: ${settings.whatsappUrl}`);
-    }
-    if (settings.externalPortfolioUrl) {
-      pushLine(lines, `- بورتفوليو خارجي: ${settings.externalPortfolioUrl}`);
     }
 
     if (home.socials.length) {
@@ -256,14 +251,17 @@ async function buildPublicSiteKnowledge(
     }
 
     pushLine(lines, "## منهجية العمل");
-    pushLine(lines, clip(handbookPage.paragraph, 180));
+    pushLine(lines, clip(handbookPage.paragraphs.join(" "), 220));
     for (const pillar of handbookPage.pillars) {
-      pushLine(lines, `- ${pillar.title}: ${clip(pillar.description, 120)}`);
+      pushLine(
+        lines,
+        `- ${pillar.title}: ${clip(pillar.paragraphs.join(" "), 140)}`,
+      );
     }
     for (const step of handbookPage.steps) {
       pushLine(
         lines,
-        `- خطوة ${step.number} ${step.title}: ${clip(step.description, 120)}`,
+        `- خطوة ${step.number} ${step.title}: ${clip(step.paragraphs.join(" "), 140)}`,
       );
     }
 
@@ -343,18 +341,15 @@ async function buildPublicSiteKnowledge(
 let ramCache: { value: string; expires: number } | null = null;
 
 export async function getPublicSiteKnowledgeCached(
-  ctx: ChatAssistantContext,
+  _ctx?: ChatAssistantContext,
 ): Promise<string> {
   if (ramCache && ramCache.expires > Date.now()) {
     return ramCache.value;
   }
 
   const value = await unstable_cache(
-    () => buildPublicSiteKnowledge(ctx.projectRequestFormUrl),
-    [
-      "chat-public-site-knowledge-v5",
-      ctx.projectRequestFormUrl ?? "default-form",
-    ],
+    () => buildPublicSiteKnowledge(),
+    ["chat-public-site-knowledge-v6"],
     { revalidate: 60, tags: [CONTENT_TAG] },
   )();
 

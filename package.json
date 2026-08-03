@@ -8,6 +8,7 @@
     "start": "node scripts/db-push-safe.js && node scripts/with-mysql-url.js next start",
     "lint": "next lint",
     "db:check": "tsx scripts/check-db.ts",
+    "db:local": "node scripts/setup-local-db.js",
     "db:push": "prisma db push",
     "db:migrate:from-supabase": "tsx scripts/migrate-postgres-to-mysql.ts",
     "prisma:generate": "prisma generate",

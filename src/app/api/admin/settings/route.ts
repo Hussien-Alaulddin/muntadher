@@ -7,18 +7,34 @@ import { withDbRetry } from "@/lib/prisma";
 const settingsFields = [
   "designerName",
   "siteName",
+  "siteTagline",
   "avatarUrl",
   "heroImageUrl",
+  "brandMarkUrl",
+  "navbarLogoUrl",
+  "footerLogoUrl",
+  "footerDescription",
   "availableForWork",
   "contactEmail",
+  "contactPhone",
+  "contactLocation",
   "whatsappUrl",
-  "projectRequestFormUrl",
-  "externalPortfolioUrl",
+  "instagramUrl",
+  "facebookUrl",
+  "telegramUrl",
   "qiCardAccount",
   "zainCashAccount",
 ] as const;
 
-const bannerFields = ["enabled", "title", "contentType", "href"] as const;
+const bannerFields = [
+  "enabled",
+  "badgeLabel",
+  "title",
+  "contentType",
+  "ctaLabel",
+  "href",
+  "imageUrl",
+] as const;
 
 function pick(payload: Record<string, unknown>, fields: readonly string[]) {
   return Object.fromEntries(

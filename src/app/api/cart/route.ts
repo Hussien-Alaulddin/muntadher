@@ -18,7 +18,7 @@ async function requireCustomer(request: Request) {
   if (!prisma) {
     return {
       error: NextResponse.json(
-        { message: "قاعدة البيانات غير متاحة" },
+        { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
         { status: 503 },
       ),
       customerId: null,

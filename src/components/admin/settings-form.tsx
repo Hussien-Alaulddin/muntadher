@@ -10,6 +10,7 @@ import {
   AdminPageHeader,
 } from "@/components/admin/admin-field";
 import type { FieldDef } from "@/lib/admin-ui-meta";
+import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,23 +32,106 @@ const SETTINGS_PATH = "/api/admin/settings";
 const settingsFields: FieldDef[] = [
   { key: "designerName", label: "اسم المصمم", type: "text", required: true },
   { key: "siteName", label: "اسم الموقع", type: "text", required: true },
-  { key: "avatarUrl", label: "صورة الأفاتار", type: "media", mediaAccept: "image", mediaFolder: "settings" },
-  { key: "heroImageUrl", label: "صورة الهيرو", type: "media", mediaAccept: "image", mediaFolder: "settings" },
+  {
+    key: "siteTagline",
+    label: "جملة عنوان التبويب",
+    type: "text",
+    required: true,
+    placeholder: "مُصمّم هُويّات بصريّة",
+    hint: "تظهر في تبويب المتصفح بعد اسم الموقع، مثال: منتظر | مُصمّم هُويّات بصريّة",
+  },
+  { key: "avatarUrl", label: "صورة الأفاتار", type: "media", mediaAccept: "image", mediaFolder: "settings", hint: mediaSizeHint(ADMIN_MEDIA_SIZES.avatar) },
+  {
+    key: "brandMarkUrl",
+    label: "اللوكو المصغّر",
+    type: "media",
+    mediaAccept: "image",
+    mediaFolder: "settings",
+    hint: mediaSizeHint(
+      ADMIN_MEDIA_SIZES.brandMark,
+      "أيقونة التبويب وبدل نجمة الوسوم في صفحات الموقع — يفضّل PNG بخلفية شفافة",
+    ),
+  },
+  {
+    key: "navbarLogoUrl",
+    label: "لوكو شريط التنقّل (مستطيل)",
+    type: "media",
+    mediaAccept: "image",
+    mediaFolder: "settings",
+    hint: mediaSizeHint(
+      ADMIN_MEDIA_SIZES.navbarLogo,
+      "يظهر بجانب الصورة الدائرية أعلى الموقع بدل كلمة الاسم — يفضّل PNG بخلفية شفافة",
+    ),
+  },
+  {
+    key: "footerLogoUrl",
+    label: "اللوكو الكامل (الفوتر)",
+    type: "media",
+    mediaAccept: "image",
+    mediaFolder: "settings",
+    hint: mediaSizeHint(
+      ADMIN_MEDIA_SIZES.footerLogo,
+      "يظهر في تذييل الموقع — يفضّل PNG بخلفية شفافة",
+    ),
+  },
+  {
+    key: "footerDescription",
+    label: "وصف الفوتر",
+    type: "textarea",
+    placeholder: "جملة قصيرة تحت اللوكو في تذييل الموقع",
+    hint: "نص تعريفي يظهر تحت اللوكو الكامل في الفوتر",
+  },
+  { key: "heroImageUrl", label: "صورة الهيرو", type: "media", mediaAccept: "image", mediaFolder: "settings", hint: mediaSizeHint(ADMIN_MEDIA_SIZES.hero) },
   { key: "availableForWork", label: "متاح للعمل", type: "boolean" },
   {
     key: "contactEmail",
-    label: "البريد",
+    label: "البريد الإلكتروني (الفوتر)",
     type: "text",
-    placeholder: "hello@example.com",
+    placeholder: "hello@muntadhar.studio",
+    hint: "يظهر في عمود معلومات التواصل في الفوتر",
   },
-  { key: "whatsappUrl", label: "رابط واتساب", type: "url" },
   {
-    key: "projectRequestFormUrl",
-    label: "رابط طلب مشروع (اختياري)",
-    type: "url",
-    hint: "اتركه فارغاً لاستخدام الاستمارة الداخلية /project-request",
+    key: "contactPhone",
+    label: "رقم الموبايل (الفوتر)",
+    type: "text",
+    placeholder: "+964 770 123 4567",
+    hint: "يظهر في عمود معلومات التواصل في الفوتر",
   },
-  { key: "externalPortfolioUrl", label: "بورتفوليو خارجي", type: "url" },
+  {
+    key: "contactLocation",
+    label: "الموقع (الفوتر)",
+    type: "text",
+    placeholder: "بغداد، العراق",
+    hint: "يظهر في عمود معلومات التواصل في الفوتر",
+  },
+  {
+    key: "instagramUrl",
+    label: "رابط انستجرام (الفوتر)",
+    type: "url",
+    placeholder: "https://instagram.com/...",
+    hint: "أيقونة انستجرام في الفوتر — اتركه فارغاً إن لم يكن جاهزاً",
+  },
+  {
+    key: "whatsappUrl",
+    label: "رابط واتساب (الفوتر)",
+    type: "url",
+    placeholder: "https://wa.me/964...",
+    hint: "أيقونة واتساب في الفوتر وصفحة التواصل",
+  },
+  {
+    key: "facebookUrl",
+    label: "رابط فيسبوك (الفوتر)",
+    type: "url",
+    placeholder: "https://facebook.com/...",
+    hint: "أيقونة فيسبوك في الفوتر — اتركه فارغاً إن لم يكن جاهزاً",
+  },
+  {
+    key: "telegramUrl",
+    label: "رابط تلجرام (الفوتر)",
+    type: "url",
+    placeholder: "https://t.me/...",
+    hint: "أيقونة تلجرام في الفوتر — اتركه فارغاً إن لم يكن جاهزاً",
+  },
 ];
 
 const paymentFields: FieldDef[] = [
@@ -68,15 +152,41 @@ const paymentFields: FieldDef[] = [
 ];
 
 const bannerFields: FieldDef[] = [
-  { key: "enabled", label: "إظهار بانر «جديد»", type: "boolean" },
-  { key: "title", label: "عنوان البانر", type: "text" },
+  { key: "enabled", label: "إظهار البانر في الرئيسية", type: "boolean" },
+  {
+    key: "badgeLabel",
+    label: "نص الشارة",
+    type: "text",
+    placeholder: "جديد",
+    hint: "يظهر بجانب أيقونة المكبر أعلى النص",
+  },
   {
     key: "contentType",
-    label: "نوع المحتوى",
+    label: "الوصف الفرعي",
     type: "text",
-    placeholder: "دورة / مقال…",
+    placeholder: "ويبينار (لقاء أونلاين)",
+  },
+  {
+    key: "title",
+    label: "عنوان البانر",
+    type: "text",
+    required: true,
+  },
+  {
+    key: "ctaLabel",
+    label: "نص الرابط",
+    type: "text",
+    placeholder: "رابط المحاضرة المسجّلة",
   },
   { key: "href", label: "رابط البانر", type: "url" },
+  {
+    key: "imageUrl",
+    label: "صورة البانر",
+    type: "media",
+    mediaAccept: "image",
+    mediaFolder: "banner",
+    hint: mediaSizeHint(ADMIN_MEDIA_SIZES.banner),
+  },
 ];
 
 function cachedSettings(): SettingsPayload | null {
@@ -192,7 +302,9 @@ export function SettingsForm() {
             <div
               key={field.key}
               className={
-                field.type === "boolean" || field.type === "media"
+                field.type === "boolean" ||
+                field.type === "media" ||
+                field.type === "textarea"
                   ? "md:col-span-2"
                   : undefined
               }
@@ -239,9 +351,10 @@ export function SettingsForm() {
       <Card className="mt-4">
         <CardHeader>
           <div className="space-y-1.5">
-            <CardTitle>بانر «جديد»</CardTitle>
+            <CardTitle>البانر المميز</CardTitle>
             <CardDescription>
-              قسم اختياري في الرئيسية — يظهر فقط عند تفعيله.
+              بطاقة في الرئيسية: شارة، وصف، عنوان، رابط، وصورة اختيارية. تظهر فقط
+              عند التفعيل.
             </CardDescription>
           </div>
           <CardAction>
@@ -252,9 +365,12 @@ export function SettingsForm() {
               onClick={() =>
                 setBanner({
                   enabled: false,
+                  badgeLabel: "",
                   title: "",
                   contentType: "",
+                  ctaLabel: "",
                   href: "",
+                  imageUrl: "",
                 })
               }
             >

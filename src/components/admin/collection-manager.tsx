@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { adminFetch, AdminApiError } from "@/lib/admin-api";
 import { peekAdminCache } from "@/lib/admin-cache";
 import type { CollectionName } from "@/lib/admin-collections";
-import { collectionMeta, emptyItem, nextOrderValue } from "@/lib/admin-ui-meta";
+import { collectionMeta, emptyItem, nextOrderValue, maxOrderValue, clampOrder } from "@/lib/admin-ui-meta";
 import {
   AdminField,
   AdminNotice,
@@ -109,6 +109,11 @@ export function CollectionManager({
     void load();
   }, [collection, load]);
 
+  const orderMax = useMemo(
+    () => maxOrderValue(items, !draft?.id),
+    [items, draft?.id],
+  );
+
   const editingLabel = useMemo(() => {
     if (!draft) return null;
     return draft.id ? "تعديل عنصر" : "إضافة عنصر";
@@ -127,7 +132,11 @@ export function CollectionManager({
   function startEdit(item: Item) {
     setSuccess(null);
     setError(null);
-    setDraft(toFormValues(collection, item));
+    const form = toFormValues(collection, item);
+    if ("order" in form) {
+      form.order = clampOrder(form.order, maxOrderValue(items, false));
+    }
+    setDraft(form);
   }
 
   async function save() {
@@ -139,7 +148,10 @@ export function CollectionManager({
       draft.id ? "جاري حفظ التعديلات…" : "جاري إضافة العنصر…",
     );
     try {
-      const payload = fromFormValues(collection, draft);
+      const payload = fromFormValues(collection, draft, {
+        itemCount: items.length,
+        isNew: !draft.id,
+      });
       if (draft.id) {
         await adminFetch(`/api/admin/${collection}/${draft.id}`, {
           method: "PATCH",
@@ -270,6 +282,7 @@ export function CollectionManager({
                     field={field}
                     value={draft[field.key]}
                     disabled={saving}
+                    orderMax={field.key === "order" ? orderMax : undefined}
                     onChange={(v) =>
                       setDraft((d) => (d ? { ...d, [field.key]: v } : d))
                     }
@@ -409,8 +422,13 @@ function toFormValues(collection: CollectionName, item: Item): Item {
 function fromFormValues(
   collection: CollectionName,
   draft: Item,
+  orderCtx: { itemCount: number; isNew: boolean },
 ): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
+  const orderCap = maxOrderValue(
+    Array.from({ length: orderCtx.itemCount }),
+    orderCtx.isNew,
+  );
   for (const field of collectionMeta[collection].fields) {
     const value = draft[field.key];
     if (field.type === "meta-list") {
@@ -427,18 +445,24 @@ function fromFormValues(
       field.type === "text" ||
       field.type === "textarea" ||
       field.type === "url" ||
-      field.type === "media"
+      field.type === "media" ||
+      field.type === "select"
     ) {
       const str = String(value ?? "").trim();
       if (field.required && !str) {
         throw new Error(`الحقل المطلوب ناقص: ${field.label}`);
       }
+      if (field.type === "select" && field.options?.length && str) {
+        const allowed = field.options.some((opt) => opt.value === str);
+        if (!allowed) {
+          throw new Error(`قيمة غير صالحة لحقل: ${field.label}`);
+        }
+      }
       payload[field.key] =
         (field.type === "url" || field.type === "media") && !str ? null : str;
     } else {
       if (field.key === "order") {
-        const n = Number(value);
-        payload[field.key] = Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1;
+        payload[field.key] = clampOrder(value, orderCap);
       } else {
         payload[field.key] = value;
       }

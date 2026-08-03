@@ -1,5 +1,4 @@
 import { getHomeContent } from "@/lib/content";
-import { Reveal } from "@/components/reveal";
 import { Hero } from "@/components/home/hero";
 import { Stats } from "@/components/home/stats";
 import { LatestWork } from "@/components/home/latest-work";
@@ -22,39 +21,17 @@ export default async function HomePage() {
   return (
     <main>
       <Hero settings={content.settings} />
-      <Reveal>
-        <Stats stats={content.stats} />
-      </Reveal>
-      <Reveal delay={40}>
-        <LatestWork projects={content.projects} />
-      </Reveal>
-      <Reveal>
-        <ClientLogos logos={content.clientLogos} />
-      </Reveal>
-      <Reveal delay={40}>
-        <Products products={content.products} />
-      </Reveal>
-      <Reveal>
-        <FeaturedBanner banner={content.banner} />
-      </Reveal>
-      <Reveal>
-        <Awards awards={content.awards} />
-      </Reveal>
-      <Reveal delay={40}>
-        <DigitalImpact items={content.digitalImpact} />
-      </Reveal>
-      <Reveal>
-        <CurrentlyWorking tasks={content.tasks} />
-      </Reveal>
-      <Reveal>
-        <CareerHighlights highlights={content.highlights} />
-      </Reveal>
-      <Reveal delay={40}>
-        <Testimonials testimonials={content.testimonials} />
-      </Reveal>
-      <Reveal>
-        <Faq faqs={content.faqs} />
-      </Reveal>
+      <Stats stats={content.stats} />
+      <LatestWork projects={content.projects} />
+      <ClientLogos logos={content.clientLogos} />
+      <Products products={content.products} />
+      <FeaturedBanner banner={content.banner} />
+      <Awards awards={content.awards} />
+      <DigitalImpact items={content.digitalImpact} />
+      <CurrentlyWorking tasks={content.tasks} />
+      <CareerHighlights highlights={content.highlights} />
+      <Testimonials testimonials={content.testimonials} />
+      <Faq faqs={content.faqs} />
     </main>
   );
 }

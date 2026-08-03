@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
       const token = createSessionToken(customer.id);
       if (!token) {
         return NextResponse.json(
-          { message: "تعذّر إنشاء الجلسة — اضبط CUSTOMER_AUTH_SECRET" },
+          { message: "تعذّر تسجيل الدخول حالياً، حاول مرة أخرى لاحقاً" },
           { status: 503 },
         );
       }
@@ -179,7 +179,7 @@ export async function POST(request: Request) {
     const token = createSessionToken(customer.id);
     if (!token) {
       return NextResponse.json(
-        { message: "تعذّر إنشاء الجلسة — اضبط CUSTOMER_AUTH_SECRET" },
+        { message: "تعذّر تسجيل الدخول حالياً، حاول مرة أخرى لاحقاً" },
         { status: 503 },
       );
     }

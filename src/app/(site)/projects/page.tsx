@@ -9,7 +9,7 @@ export default async function ProjectsPage() {
 
   return (
     <main>
-      <ProjectsHero settings={content.settings} />
+      <ProjectsHero brandMarkUrl={content.settings.brandMarkUrl} />
       <ProjectsGrid projects={content.projects} />
     </main>
   );

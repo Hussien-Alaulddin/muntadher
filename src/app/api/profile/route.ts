@@ -74,7 +74,7 @@ export async function GET(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }
@@ -101,7 +101,7 @@ export async function PATCH(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }
@@ -220,7 +220,7 @@ export async function POST(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }

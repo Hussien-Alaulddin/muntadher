@@ -1,8 +1,12 @@
 import type { CollectionName } from "@/lib/admin-collections";
 import { collections } from "@/lib/admin-collections";
+import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
 import { emptyCourseDetail } from "@/lib/course-detail";
 import { emptyCourseWatchContent } from "@/lib/course-watch";
-import { PROJECT_CASE_IMAGE } from "@/lib/project-case-image";
+import {
+  digitalImpactPlatformOptions,
+  socialLinkPlatformOptions,
+} from "@/lib/social-platforms";
 
 export type FieldType =
   | "text"
@@ -11,11 +15,19 @@ export type FieldType =
   | "media"
   | "number"
   | "boolean"
+  | "select"
   | "meta-list"
   | "gallery-list"
   | "files-list"
   | "course-detail"
   | "course-watch";
+
+export type FieldOption = {
+  value: string;
+  label: string;
+  /** مفتاح أيقونة من socialIconMap إن وُجد */
+  iconKey?: string;
+};
 
 export type FieldDef = {
   key: string;
@@ -24,6 +36,7 @@ export type FieldDef = {
   required?: boolean;
   hint?: string;
   placeholder?: string;
+  options?: FieldOption[];
   /** لنوع media: صورة / فيديو / ملف / الاثنين */
   mediaAccept?: "image" | "video" | "both" | "file";
   /** مجلد التخزين داخل bucket أو uploads */
@@ -57,8 +70,8 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       { key: "title", label: "العنوان", type: "text", required: true },
       { key: "slug", label: "المعرّف (slug)", type: "text", required: true, hint: "يظهر في الرابط: /projects/slug — لا تغيّره بعد النشر إن أمكن" },
       { key: "category", label: "التصنيف", type: "text", required: true },
-      { key: "imageUrl", label: "صورة البطاقة", type: "media", mediaAccept: "image", mediaFolder: "projects", hint: "تظهر في قائمة المشاريع فقط" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "imageUrl", label: "صورة البطاقة", type: "media", mediaAccept: "image", mediaFolder: "projects", hint: mediaSizeHint(ADMIN_MEDIA_SIZES.projectCard, "تظهر في قائمة المشاريع") },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
       { key: "published", label: "منشور", type: "boolean" },
       { key: "description", label: "الوصف", type: "textarea" },
       {
@@ -71,10 +84,8 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         key: "brandGallery",
         label: "صور المشروع",
         type: "gallery-list",
-        hint: `ارفع صور دراسة الحالة بمقاس ${PROJECT_CASE_IMAGE.label}. اضغط «إضافة عنصر» لكل صورة حتى تكتمل كل صور المشروع.`,
+        hint: mediaSizeHint(ADMIN_MEDIA_SIZES.projectGallery, "اضغط «إضافة عنصر» لكل صورة"),
       },
-      { key: "externalCaseStudyUrl", label: "رابط دراسة حالة خارجية", type: "url" },
-      { key: "externalCaseStudyLabel", label: "نص زر الدراسة الخارجية", type: "text" },
     ],
   },
   courses: {
@@ -124,6 +135,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         type: "media",
         mediaAccept: "image",
         mediaFolder: "products",
+        hint: mediaSizeHint(ADMIN_MEDIA_SIZES.productCard),
       },
       {
         key: "coverImageUrl",
@@ -131,6 +143,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         type: "media",
         mediaAccept: "image",
         mediaFolder: "products",
+        hint: mediaSizeHint(ADMIN_MEDIA_SIZES.productCover),
       },
       {
         key: "courseDetail",
@@ -144,7 +157,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         type: "course-watch",
         hint: "المحاور التعليمية داخل الدورة: دروس، وصف، فيديو، وملحقات (ملفات أو روابط)",
       },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
       { key: "published", label: "منشور", type: "boolean" },
     ],
   },
@@ -195,6 +208,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         type: "media",
         mediaAccept: "image",
         mediaFolder: "products",
+        hint: mediaSizeHint(ADMIN_MEDIA_SIZES.productCard),
       },
       {
         key: "coverImageUrl",
@@ -202,6 +216,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         type: "media",
         mediaAccept: "image",
         mediaFolder: "products",
+        hint: mediaSizeHint(ADMIN_MEDIA_SIZES.productCover),
       },
       {
         key: "files",
@@ -209,7 +224,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
         type: "files-list",
         hint: "ملفات رقمية — مقفلة حتى يسجّل العميل ويدّعي المنتج",
       },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
       { key: "published", label: "منشور", type: "boolean" },
     ],
   },
@@ -222,7 +237,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       { key: "label", label: "التسمية", type: "text", required: true },
       { key: "slug", label: "المعرّف", type: "text", required: true },
       { key: "value", label: "القيمة", type: "text", placeholder: "120+" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   awards: {
@@ -234,8 +249,8 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       { key: "title", label: "العنوان", type: "text", required: true },
       { key: "org", label: "الجهة", type: "text", required: true },
       { key: "description", label: "الوصف", type: "textarea", required: true },
-      { key: "imageUrl", label: "الصورة", type: "media", mediaAccept: "image", mediaFolder: "awards" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "imageUrl", label: "الصورة", type: "media", mediaAccept: "image", mediaFolder: "awards", hint: mediaSizeHint(ADMIN_MEDIA_SIZES.award) },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   "digital-impact": {
@@ -244,11 +259,18 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
     description: "أرقام المنصات (متابعون، مشاهدات…)",
     listKeys: ["platform", "value", "label", "order"],
     fields: [
-      { key: "platform", label: "المنصة", type: "text", required: true },
+      {
+        key: "platform",
+        label: "المنصة",
+        type: "select",
+        required: true,
+        options: digitalImpactPlatformOptions,
+        hint: "اختر المنصة لعرض شعارها تلقائياً",
+      },
       { key: "value", label: "القيمة", type: "text", required: true },
       { key: "label", label: "نوع العد", type: "text", required: true, placeholder: "متابع" },
       { key: "url", label: "الرابط", type: "url" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   tasks: {
@@ -261,7 +283,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       { key: "completed", label: "مكتمل", type: "boolean" },
       { key: "tag", label: "وسم", type: "text" },
       { key: "tagHref", label: "رابط الوسم", type: "url" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   "career-highlights": {
@@ -271,7 +293,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
     listKeys: ["text", "order"],
     fields: [
       { key: "text", label: "النص", type: "textarea", required: true },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   "client-logos": {
@@ -281,8 +303,8 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
     listKeys: ["name", "order"],
     fields: [
       { key: "name", label: "الاسم", type: "text", required: true },
-      { key: "logoUrl", label: "الشعار", type: "media", mediaAccept: "image", mediaFolder: "logos" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "logoUrl", label: "الشعار", type: "media", mediaAccept: "image", mediaFolder: "logos", hint: mediaSizeHint(ADMIN_MEDIA_SIZES.clientLogo, "خلفية شفافة PNG إن أمكن") },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   testimonials: {
@@ -294,7 +316,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
       { key: "quote", label: "الاقتباس", type: "textarea", required: true },
       { key: "name", label: "الاسم", type: "text", required: true },
       { key: "title", label: "الصفة", type: "text", required: true },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   faqs: {
@@ -305,7 +327,7 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
     fields: [
       { key: "question", label: "السؤال", type: "text", required: true },
       { key: "answer", label: "الجواب", type: "textarea", required: true },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
   socials: {
@@ -314,10 +336,17 @@ export const collectionMeta: Record<CollectionName, CollectionMeta> = {
     description: "أيقونات الفوتر وروابط التواصل",
     listKeys: ["platform", "url", "enabled", "order"],
     fields: [
-      { key: "platform", label: "المنصة", type: "text", required: true, placeholder: "instagram" },
+      {
+        key: "platform",
+        label: "المنصة",
+        type: "select",
+        required: true,
+        options: socialLinkPlatformOptions,
+        hint: "اختر المنصة لعرض شعارها في الفوتر",
+      },
       { key: "url", label: "الرابط", type: "url", required: true },
       { key: "enabled", label: "مفعّل", type: "boolean" },
-      { key: "order", label: "الترتيب", type: "number", hint: "يبدأ من 1" },
+      { key: "order", label: "الترتيب", type: "number", hint: "من 1 إلى عدد العناصر" },
     ],
   },
 };
@@ -351,6 +380,8 @@ export function emptyItem(collection: CollectionName): Record<string, unknown> {
         field.key === "published" || field.key === "enabled";
     else if (field.type === "number")
       item[field.key] = field.key === "order" ? 1 : 0;
+    else if (field.type === "select")
+      item[field.key] = field.options?.[0]?.value ?? "";
     else if (
       field.type === "meta-list" ||
       field.type === "gallery-list" ||
@@ -375,12 +406,5 @@ export function emptyItem(collection: CollectionName): Record<string, unknown> {
   return item;
 }
 
-/** الترتيب التالي عند الإضافة = أكبر ترتيب موجود + 1 (يبدأ من 1) */
-export function nextOrderValue(items: Array<Record<string, unknown>>): number {
-  let max = 0;
-  for (const item of items) {
-    const n = Number(item.order);
-    if (Number.isFinite(n) && n > max) max = n;
-  }
-  return max + 1;
-}
+/** الترتيب التالي عند الإضافة = عدد العناصر + 1 */
+export { nextOrderValue, maxOrderValue, clampOrder } from "@/lib/admin-order";

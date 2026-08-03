@@ -42,7 +42,10 @@ export default async function ProjectDetailPage({
 
   return (
     <main>
-      <ProjectIntro project={project} />
+      <ProjectIntro
+        project={project}
+        brandMarkUrl={content.settings.brandMarkUrl}
+      />
       <ProjectMeta items={project.meta} />
       <ProjectCaseStudyStack title={project.title} gallery={project.gallery} />
       <div className="pb-[45px] md:pb-[55px]" />

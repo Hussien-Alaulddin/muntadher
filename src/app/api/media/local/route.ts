@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   }
 
   if (!isPrivateObjectKey(key)) {
-    return NextResponse.json({ message: "الملف غير خاص" }, { status: 400 });
+    return NextResponse.json({ message: "تعذّر الوصول إلى الملف" }, { status: 400 });
   }
 
   if (!localPrivateFileExists(key)) {
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
   const allowed = await canAccessPrivateKey(request, key, productId, exp, sig);
   if (!allowed) {
-    return NextResponse.json({ message: "غير مصرّح" }, { status: 403 });
+    return NextResponse.json({ message: "تعذّر الوصول إلى الملف" }, { status: 403 });
   }
 
   const stream = openLocalPrivateReadStream(key);

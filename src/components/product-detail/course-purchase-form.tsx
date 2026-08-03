@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { formatSitePrice } from "@/lib/currency";
+import { userFacingMessage } from "@/lib/public-messages";
 
 const COUNTRY_DIALS = [
   { code: "IQ", name: "العراق", dial: "964", flag: "🇮🇶" },
@@ -176,7 +177,7 @@ export function CoursePurchaseForm({
         url?: string;
       };
       if (!res.ok || !data.url) {
-        setError(data.message ?? "تعذّر رفع صورة التحويل");
+        setError(userFacingMessage(data.message, "تعذّر رفع صورة التحويل"));
         return;
       }
       setReceiptUrl(data.url);
@@ -216,15 +217,17 @@ export function CoursePurchaseForm({
         message?: string;
       };
       if (!res.ok) {
-        setError(data.message ?? "تعذّر إرسال الطلب");
+        setError(userFacingMessage(data.message, "تعذّر إرسال الطلب"));
         return;
       }
       setSuccess(
-        data.message ??
+        userFacingMessage(
+          data.message,
           "تم إرسال طلبك بنجاح وسيتم مراجعته قريباً وفتح الدورة لك.",
+        ),
       );
     } catch {
-      setError("تعذّر الاتصال بالخادم");
+      setError("تعذّر الاتصال، تحقق من الإنترنت وحاول مرة أخرى");
     } finally {
       setSubmitting(false);
     }

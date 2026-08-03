@@ -17,6 +17,7 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useShop } from "@/components/shop/shop-provider";
+import { userFacingMessage } from "@/lib/public-messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -113,7 +114,7 @@ export function ProfileView({ customer }: { customer: ProfileCustomer }) {
         customer?: ProfileCustomer;
       };
       if (!res.ok) {
-        toast.error(data.message ?? "تعذّر حفظ التعديلات");
+        toast.error(userFacingMessage(data.message, "تعذّر حفظ التعديلات"));
         return;
       }
       if (data.customer) applyCustomer(data.customer);
@@ -121,7 +122,7 @@ export function ProfileView({ customer }: { customer: ProfileCustomer }) {
       router.refresh();
       toast.success("تم حفظ الملف الشخصي");
     } catch {
-      toast.error("تعذّر الاتصال بالخادم");
+      toast.error("تعذّر الاتصال، تحقق من الإنترنت وحاول مرة أخرى");
     } finally {
       setSaving(false);
     }
@@ -142,7 +143,7 @@ export function ProfileView({ customer }: { customer: ProfileCustomer }) {
         customer?: ProfileCustomer;
       };
       if (!res.ok) {
-        toast.error(data.message ?? "تعذّر رفع الصورة");
+        toast.error(userFacingMessage(data.message, "تعذّر رفع الصورة"));
         return;
       }
       if (data.customer) applyCustomer(data.customer);
@@ -171,7 +172,7 @@ export function ProfileView({ customer }: { customer: ProfileCustomer }) {
         customer?: ProfileCustomer;
       };
       if (!res.ok) {
-        toast.error(data.message ?? "تعذّر إزالة الصورة");
+        toast.error(userFacingMessage(data.message, "تعذّر إزالة الصورة"));
         return;
       }
       if (data.customer) applyCustomer(data.customer);

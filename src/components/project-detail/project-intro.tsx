@@ -1,14 +1,20 @@
 import type { ProjectDetailView } from "@/lib/content";
-import { StarBadgeIcon } from "@/components/icons";
+import { BrandMark } from "@/components/brand-mark";
 
-export function ProjectIntro({ project }: { project: ProjectDetailView }) {
+export function ProjectIntro({
+  project,
+  brandMarkUrl,
+}: {
+  project: ProjectDetailView;
+  brandMarkUrl?: string | null;
+}) {
   return (
     <section id="project-intro" className="pt-[50px] md:pt-[70px]">
       <div className="container-site">
         {/* عمود المقدمة ~408px يمين كما في المرجع */}
         <div className="flex max-w-[408px] flex-col items-start gap-6 pb-12">
           <span className="inline-flex items-center gap-2 rounded-[24px] border border-ink/10 px-3 py-1">
-            <StarBadgeIcon className="size-3.5 shrink-0 text-accent-blue" />
+            <BrandMark src={brandMarkUrl} />
             <span className="text-micro text-ink">{project.category}</span>
           </span>
 

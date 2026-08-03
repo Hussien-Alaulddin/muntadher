@@ -10,23 +10,35 @@ import {
 import { CourseDetailEditor } from "@/components/admin/course-detail-editor";
 import { CourseWatchEditor } from "@/components/admin/course-watch-editor";
 import { MediaUploader } from "@/components/admin/media-uploader";
+import { socialIconMap } from "@/components/icons";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CheckCircle2Icon, CircleAlertIcon, InfoIcon } from "lucide-react";
+import { clampOrder } from "@/lib/admin-order";
 
 export function AdminField({
   field,
   value,
   onChange,
   disabled,
+  orderMax,
 }: {
   field: FieldDef;
   value: unknown;
   onChange: (value: unknown) => void;
   disabled?: boolean;
+  /** أقصى ترتيب مسموح لحقل order */
+  orderMax?: number;
 }) {
   const id = `field-${field.key}`;
 
@@ -107,6 +119,51 @@ export function AdminField({
     );
   }
 
+  if (field.type === "select") {
+    const options = field.options ?? [];
+    const selected = String(value ?? "");
+
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={id}>
+          {field.label}
+          {field.required ? <span className="text-destructive"> *</span> : null}
+        </Label>
+        <Select
+          value={selected || undefined}
+          disabled={disabled}
+          onValueChange={(next) => onChange(next)}
+        >
+          <SelectTrigger id={id} className="h-9 w-full">
+            <SelectValue placeholder={field.placeholder ?? "اختر…"} />
+          </SelectTrigger>
+          <SelectContent
+            position="popper"
+            className="w-[var(--radix-select-trigger-width)]"
+          >
+            {options.map((opt) => {
+              const Icon =
+                opt.iconKey && opt.iconKey in socialIconMap
+                  ? socialIconMap[opt.iconKey as keyof typeof socialIconMap]
+                  : null;
+              return (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <span className="flex items-center gap-2">
+                    {Icon ? <Icon className="size-4 text-accent-blue" /> : null}
+                    {opt.label}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        {field.hint ? (
+          <p className="text-xs text-muted-foreground">{field.hint}</p>
+        ) : null}
+      </div>
+    );
+  }
+
   const display =
     value === null || value === undefined ? "" : String(value);
 
@@ -125,6 +182,10 @@ export function AdminField({
       />
     );
   }
+
+  const isOrder = field.key === "order" && field.type === "number";
+  const max = isOrder && orderMax ? orderMax : undefined;
+  const orderHint = isOrder && max ? `من 1 إلى ${max}` : field.hint;
 
   return (
     <div className="space-y-2">
@@ -156,7 +217,8 @@ export function AdminField({
           value={display}
           disabled={disabled}
           placeholder={field.placeholder}
-          min={field.key === "order" ? 1 : undefined}
+          min={isOrder ? 1 : undefined}
+          max={max}
           step={field.type === "number" ? 1 : undefined}
           dir={field.type === "url" ? "ltr" : undefined}
           onChange={(e) => {
@@ -164,7 +226,9 @@ export function AdminField({
               const n = e.target.value === "" ? 0 : Number(e.target.value);
               const next = Number.isFinite(n) ? n : 0;
               onChange(
-                field.key === "order" ? Math.max(1, next || 1) : next,
+                isOrder
+                  ? clampOrder(next, max ?? Number.MAX_SAFE_INTEGER)
+                  : next,
               );
             } else {
               onChange(e.target.value);
@@ -173,8 +237,8 @@ export function AdminField({
         />
       )}
 
-      {field.hint ? (
-        <p className="text-xs text-muted-foreground">{field.hint}</p>
+      {orderHint ? (
+        <p className="text-xs text-muted-foreground">{orderHint}</p>
       ) : null}
     </div>
   );

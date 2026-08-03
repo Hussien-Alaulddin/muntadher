@@ -23,3 +23,14 @@ hostinger.env
 # قالب فقط — الملف الحقيقي على السيرفر: /home/u908955624/muntadhar.env
 muntadhar.env
 
+# وسائط التطوير المحلي
+storage/local-media/**
+!storage/local-media/.gitkeep
+
+# قاعدة SQLite التجريبية + schema مولَّد محلياً
+storage/*.db
+storage/*.db-journal
+storage/*.db-wal
+storage/*.db-shm
+prisma/schema.local.prisma
+

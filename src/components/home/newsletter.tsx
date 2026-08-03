@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { sections } from "@/lib/fixed-content";
 import { accentButtonClass, cx } from "@/components/ui";
+import { userFacingMessage, userFacingCatchMessage } from "@/lib/public-messages";
 
 type Status = "idle" | "loading" | "done" | "error";
 
@@ -23,15 +24,23 @@ export function Newsletter() {
       });
       const data = (await response.json()) as { message?: string };
 
-      if (!response.ok) throw new Error(data.message ?? "تعذّر إكمال الاشتراك");
+      if (!response.ok) {
+        setStatus("error");
+        setMessage(
+          userFacingMessage(data.message, "تعذّر إكمال الاشتراك"),
+        );
+        return;
+      }
 
       setStatus("done");
-      setMessage(data.message ?? "تم تسجيل بريدك، شكراً لك.");
+      setMessage(
+        userFacingMessage(data.message, "تم تسجيل بريدك، شكراً لك."),
+      );
       setEmail("");
     } catch (error) {
       setStatus("error");
       setMessage(
-        error instanceof Error ? error.message : "تعذّر إكمال الاشتراك",
+        userFacingCatchMessage(error, "تعذّر إكمال الاشتراك، تحقق من الاتصال"),
       );
     }
   }

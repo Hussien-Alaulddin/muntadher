@@ -1,7 +1,7 @@
 import { cache } from "react";
-import { getPrisma, isDatabaseConfigured, withDbRetry } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
-import { statLabels } from "@/lib/fixed-content";
+import { sections, statLabels } from "@/lib/fixed-content";
+import { getPrisma, isDatabaseConfigured, withDbRetry } from "@/lib/prisma";
 import {
   careerHighlightsPlaceholder,
   currentTasksPlaceholder,
@@ -97,13 +97,21 @@ const courseDetailSelect = {
 export type SettingsView = {
   designerName: string;
   siteName: string;
+  siteTagline: string;
   avatarUrl: string | null;
   heroImageUrl: string | null;
+  brandMarkUrl: string | null;
+  navbarLogoUrl: string | null;
+  footerLogoUrl: string | null;
+  footerDescription: string | null;
   availableForWork: boolean;
   contactEmail: string | null;
+  contactPhone: string | null;
+  contactLocation: string | null;
   whatsappUrl: string | null;
-  projectRequestFormUrl: string | null;
-  externalPortfolioUrl: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  telegramUrl: string | null;
 };
 
 export type StatView = { slug: string; label: string; value: string };
@@ -150,9 +158,12 @@ export type ProductView = {
   group: "core" | "resource";
 };
 export type BannerView = {
+  badgeLabel: string;
   title: string;
   contentType: string | null;
+  ctaLabel: string | null;
   href: string | null;
+  imageUrl: string | null;
 } | null;
 export type AwardView = {
   id: string;
@@ -209,13 +220,21 @@ export type HomeContent = {
 const defaultSettings: SettingsView = {
   designerName: "منتظر",
   siteName: "منتظر",
+  siteTagline: "مُصمّم هُويّات بصريّة",
   avatarUrl: null,
   heroImageUrl: null,
+  brandMarkUrl: null,
+  navbarLogoUrl: null,
+  footerLogoUrl: null,
+  footerDescription: null,
   availableForWork: true,
-  contactEmail: null,
+  contactEmail: "hello@muntadhar.studio",
+  contactPhone: "+964 770 123 4567",
+  contactLocation: "بغداد، العراق",
   whatsappUrl: null,
-  projectRequestFormUrl: null,
-  externalPortfolioUrl: null,
+  instagramUrl: null,
+  facebookUrl: null,
+  telegramUrl: null,
 };
 
 /** التسميات الأربع ثابتة دائماً من fixed-content */
@@ -256,9 +275,12 @@ function placeholderHomeContent(): HomeContent {
     })),
     banner: demo
       ? {
+          badgeLabel: demoBanner.badgeLabel,
           title: demoBanner.title,
           contentType: demoBanner.contentType,
+          ctaLabel: demoBanner.ctaLabel,
           href: demoBanner.href,
+          imageUrl: demoBanner.imageUrl,
         }
       : null,
     awards: demo
@@ -362,19 +384,7 @@ async function loadHomeContent(): Promise<HomeContent> {
     const statsBySlug = new Map(stats.map((stat) => [stat.slug, stat.value]));
 
     return {
-      settings: settings
-        ? {
-            designerName: settings.designerName,
-            siteName: settings.siteName,
-            avatarUrl: settings.avatarUrl,
-            heroImageUrl: settings.heroImageUrl,
-            availableForWork: settings.availableForWork,
-            contactEmail: settings.contactEmail,
-            whatsappUrl: settings.whatsappUrl,
-            projectRequestFormUrl: settings.projectRequestFormUrl,
-            externalPortfolioUrl: settings.externalPortfolioUrl,
-          }
-        : defaultSettings,
+      settings: mapSettings(settings),
       socials: socials.map(({ id, platform, url }) => ({ id, platform, url })),
       stats: statLabels.map(({ slug, label }) => ({
         slug,
@@ -404,9 +414,12 @@ async function loadHomeContent(): Promise<HomeContent> {
       banner:
         banner?.enabled && banner.title
           ? {
+              badgeLabel: banner.badgeLabel?.trim() || sections.featuredBanner.tag,
               title: banner.title,
               contentType: banner.contentType,
+              ctaLabel: banner.ctaLabel,
               href: banner.href,
+              imageUrl: banner.imageUrl,
             }
           : null,
       awards: awards.map(({ id, org, title, description, imageUrl }) => ({
@@ -465,26 +478,43 @@ function mapSettings(
   settings: {
     designerName: string;
     siteName: string;
+    siteTagline?: string | null;
     avatarUrl: string | null;
     heroImageUrl: string | null;
+    brandMarkUrl: string | null;
+    navbarLogoUrl?: string | null;
+    footerLogoUrl: string | null;
+    footerDescription: string | null;
     availableForWork: boolean;
     contactEmail: string | null;
+    contactPhone: string | null;
+    contactLocation: string | null;
     whatsappUrl: string | null;
-    projectRequestFormUrl: string | null;
-    externalPortfolioUrl: string | null;
+    instagramUrl: string | null;
+    facebookUrl: string | null;
+    telegramUrl: string | null;
   } | null,
 ): SettingsView {
   if (!settings) return defaultSettings;
   return {
     designerName: settings.designerName,
     siteName: settings.siteName,
+    siteTagline:
+      settings.siteTagline?.trim() || defaultSettings.siteTagline,
     avatarUrl: settings.avatarUrl,
     heroImageUrl: settings.heroImageUrl,
+    brandMarkUrl: settings.brandMarkUrl,
+    navbarLogoUrl: settings.navbarLogoUrl ?? null,
+    footerLogoUrl: settings.footerLogoUrl,
+    footerDescription: settings.footerDescription,
     availableForWork: settings.availableForWork,
     contactEmail: settings.contactEmail,
+    contactPhone: settings.contactPhone,
+    contactLocation: settings.contactLocation,
     whatsappUrl: settings.whatsappUrl,
-    projectRequestFormUrl: settings.projectRequestFormUrl,
-    externalPortfolioUrl: settings.externalPortfolioUrl,
+    instagramUrl: settings.instagramUrl,
+    facebookUrl: settings.facebookUrl,
+    telegramUrl: settings.telegramUrl,
   };
 }
 
@@ -563,7 +593,7 @@ async function loadProjectsPageContent(): Promise<ProjectsPageContent> {
 export const getSiteChrome = cache(async (): Promise<{
   settings: SettingsView;
   socials: SocialView[];
-}> => cached(["site-chrome"], loadSiteChrome));
+}> => cached(["site-chrome-v4"], loadSiteChrome));
 
 async function loadSiteChrome(): Promise<{
   settings: SettingsView;

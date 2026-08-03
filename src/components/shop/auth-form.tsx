@@ -8,15 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sanitizeNext } from "@/lib/safe-redirect";
+import { userFacingMessage } from "@/lib/public-messages";
 
 type Mode = "login" | "register";
 
 const ERROR_MESSAGES: Record<string, string> = {
-  google_config: "تسجيل Google غير مهيأ حالياً",
-  session_secret: "تعذّر إنشاء الجلسة — راجع إعدادات الخادم",
+  google_config: "تسجيل الدخول عبر Google غير متاح حالياً",
+  session_secret: "تعذّر إكمال تسجيل الدخول، حاول مرة أخرى لاحقاً",
   google_denied: "تم إلغاء تسجيل الدخول عبر Google",
-  google_code: "تعذّر إكمال تسجيل Google",
-  google_state: "انتهت صلاحية طلب Google — حاول مرة أخرى",
+  google_code: "تعذّر إكمال تسجيل الدخول عبر Google",
+  google_state: "انتهت صلاحية الطلب — حاول مرة أخرى",
   google_failed: "تعذّر تسجيل الدخول عبر Google",
   google_link_password:
     "هذا البريد مسجّل بكلمة مرور — سجّل الدخول بها أولاً",
@@ -87,13 +88,13 @@ export function AuthForm({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.message ?? "تعذّر إتمام العملية");
+        setError(userFacingMessage(data.message, "تعذّر إتمام العملية"));
         return;
       }
       router.replace(next);
       router.refresh();
     } catch {
-      setError("تعذّر الاتصال بالخادم");
+      setError("تعذّر الاتصال، تحقق من الإنترنت وحاول مرة أخرى");
     } finally {
       setLoading(false);
     }

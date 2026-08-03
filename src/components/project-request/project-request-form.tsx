@@ -10,6 +10,7 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from "@/components/ui";
+import { userFacingMessage, userFacingCatchMessage } from "@/lib/public-messages";
 
 type ContactValue = {
   email: string;
@@ -128,11 +129,21 @@ export function ProjectRequestForm({
         body: JSON.stringify({ answers }),
       });
       const data = (await res.json()) as { message?: string };
-      if (!res.ok) throw new Error(data.message ?? "تعذّر الإرسال");
+      if (!res.ok) {
+        setError(userFacingMessage(data.message, "تعذّر الإرسال"));
+        return;
+      }
       setDone(true);
-      setDoneMessage(data.message ?? "تم إرسال طلبك بنجاح.");
+      setDoneMessage(
+        userFacingMessage(data.message, "تم إرسال طلبك بنجاح."),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "تعذّر الإرسال");
+      setError(
+        userFacingCatchMessage(
+          err,
+          "تعذّر الإرسال، تحقق من الاتصال وحاول مرة أخرى",
+        ),
+      );
     } finally {
       setSubmitting(false);
     }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
+import { clampOrder } from "@/lib/admin-order";
 import { withDbRetry } from "@/lib/prisma";
 import {
   collectionListWhere,
@@ -60,7 +61,7 @@ export async function POST(request: Request, { params }: Params) {
 
   try {
     const payload = (await request.json()) as Record<string, unknown>;
-    const data = pickFields(collection, payload);
+    const data = pickFields(collection, payload) as Record<string, unknown>;
     const missing = missingRequired(collection, data);
 
     if (missing.length > 0) {
@@ -70,9 +71,15 @@ export async function POST(request: Request, { params }: Params) {
       );
     }
 
-    const item = await withDbRetry((prisma) =>
-      getDelegate(prisma, collection).create({ data }),
-    );
+    const where = collectionListWhere(collection);
+    const item = await withDbRetry(async (prisma) => {
+      const delegate = getDelegate(prisma, collection);
+      if ("order" in data) {
+        const count = await delegate.count({ where });
+        data.order = clampOrder(data.order, count + 1);
+      }
+      return delegate.create({ data });
+    });
     revalidateSite();
 
     return NextResponse.json({ item }, { status: 201 });

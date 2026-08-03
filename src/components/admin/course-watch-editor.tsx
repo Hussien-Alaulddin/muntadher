@@ -2,6 +2,7 @@
 
 import { ChevronDownIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useRef, useState, type ReactNode } from "react";
+import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
 import { MediaUploader } from "@/components/admin/media-uploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -251,6 +252,7 @@ export function CourseWatchEditor({
         disabled={disabled}
         folder="course-watch"
         accept="image"
+        hint={mediaSizeHint(ADMIN_MEDIA_SIZES.watchPoster)}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -448,6 +450,7 @@ export function CourseWatchEditor({
                         disabled={disabled}
                         folder="course-lessons"
                         accept="image"
+                        hint={mediaSizeHint(ADMIN_MEDIA_SIZES.lessonPoster)}
                       />
 
                       <div className="space-y-2 rounded-lg border border-dashed p-3">

@@ -8,8 +8,12 @@ export function normalizeDatabaseUrl(
 ): string | null {
   if (!raw?.trim()) return null;
 
+  const trimmed = raw.trim();
+  // SQLite محلي: file:/path/to.db
+  if (trimmed.startsWith("file:")) return trimmed;
+
   try {
-    const url = new URL(raw);
+    const url = new URL(trimmed);
     const protocol = url.protocol.replace(":", "").toLowerCase();
     const isMysql =
       protocol === "mysql" ||

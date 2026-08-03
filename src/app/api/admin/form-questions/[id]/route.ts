@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
+import { clampOrder } from "@/lib/admin-order";
 import { withDbRetry } from "@/lib/prisma";
 
 function asOptions(value: unknown): string[] | null {
@@ -33,8 +34,8 @@ export async function PATCH(
     if (typeof body.enabled === "boolean") data.enabled = body.enabled;
     if (body.options !== undefined) data.options = asOptions(body.options);
     if (body.order !== undefined) {
-      const n = Number(body.order);
-      data.order = Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1;
+      const count = await withDbRetry((db) => db.projectFormQuestion.count());
+      data.order = clampOrder(body.order, Math.max(1, count));
     }
     if (typeof body.key === "string" && body.key.trim()) {
       data.key = body.key.trim().replace(/\s+/g, "_").toLowerCase();

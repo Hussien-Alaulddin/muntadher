@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "خدمة الاستمارة غير مهيأة بعد" },
+      { message: "تعذّر إرسال الطلب حالياً، حاول لاحقاً" },
       { status: 503 },
     );
   }

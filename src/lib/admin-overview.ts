@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import { isSqliteDatabase } from "@/lib/db-dialect";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "جديد",
@@ -140,9 +141,48 @@ async function daySeriesBundle(
   entitlements: Map<string, number>;
   newsletter: Map<string, number>;
 }> {
-  const rows = await db.$queryRaw<
-    Array<{ source: string; day: string; count: number }>
-  >`
+  const sqlite = isSqliteDatabase();
+  const rows = sqlite
+    ? await db.$queryRawUnsafe<
+        Array<{ source: string; day: string; count: number }>
+      >(
+        `
+    SELECT 'customers' AS source,
+           strftime('%Y-%m-%d', "createdAt") AS day,
+           CAST(COUNT(*) AS INTEGER) AS count
+    FROM customers
+    WHERE "createdAt" >= ?
+    GROUP BY 2
+    UNION ALL
+    SELECT 'forms',
+           strftime('%Y-%m-%d', "createdAt"),
+           CAST(COUNT(*) AS INTEGER)
+    FROM project_form_responses
+    WHERE "createdAt" >= ?
+    GROUP BY 2
+    UNION ALL
+    SELECT 'entitlements',
+           strftime('%Y-%m-%d', "createdAt"),
+           CAST(COUNT(*) AS INTEGER)
+    FROM customer_entitlements
+    WHERE "createdAt" >= ?
+    GROUP BY 2
+    UNION ALL
+    SELECT 'newsletter',
+           strftime('%Y-%m-%d', "createdAt"),
+           CAST(COUNT(*) AS INTEGER)
+    FROM newsletter_subscribers
+    WHERE "createdAt" >= ?
+    GROUP BY 2
+  `,
+        rangeStart,
+        rangeStart,
+        rangeStart,
+        rangeStart,
+      )
+    : await db.$queryRaw<
+        Array<{ source: string; day: string; count: number }>
+      >`
     SELECT 'customers' AS source,
            DATE_FORMAT(\`createdAt\`, '%Y-%m-%d') AS day,
            CAST(COUNT(*) AS SIGNED) AS count
@@ -195,19 +235,49 @@ async function buildKpis(
   weekStart: Date,
   prevWeekStart: Date,
 ): Promise<OverviewKpisPayload> {
+  const sqlite = isSqliteDatabase();
   // استعلامان مجمّعان فقط + groupBy للحالات
   const [customerFormStats, shopContentStats, formByStatus] = await Promise.all([
-    db.$queryRaw<
-      Array<{
-        customers_total: number;
-        customers_week: number;
-        customers_prev: number;
-        customers_located: number;
-        forms_total: number;
-        forms_week: number;
-        forms_prev: number;
-      }>
-    >`
+    sqlite
+      ? db.$queryRawUnsafe<
+          Array<{
+            customers_total: number;
+            customers_week: number;
+            customers_prev: number;
+            customers_located: number;
+            forms_total: number;
+            forms_week: number;
+            forms_prev: number;
+          }>
+        >(
+          `
+      SELECT
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM customers) AS customers_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM customers WHERE "createdAt" >= ?) AS customers_week,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM customers WHERE "createdAt" >= ? AND "createdAt" < ?) AS customers_prev,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM customers WHERE country IS NOT NULL) AS customers_located,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM project_form_responses) AS forms_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM project_form_responses WHERE "createdAt" >= ?) AS forms_week,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM project_form_responses WHERE "createdAt" >= ? AND "createdAt" < ?) AS forms_prev
+    `,
+          weekStart,
+          prevWeekStart,
+          weekStart,
+          weekStart,
+          prevWeekStart,
+          weekStart,
+        )
+      : db.$queryRaw<
+          Array<{
+            customers_total: number;
+            customers_week: number;
+            customers_prev: number;
+            customers_located: number;
+            forms_total: number;
+            forms_week: number;
+            forms_prev: number;
+          }>
+        >`
       SELECT
         (SELECT CAST(COUNT(*) AS SIGNED) FROM customers) AS customers_total,
         (SELECT CAST(COUNT(*) AS SIGNED) FROM customers WHERE \`createdAt\` >= ${weekStart}) AS customers_week,
@@ -217,22 +287,57 @@ async function buildKpis(
         (SELECT CAST(COUNT(*) AS SIGNED) FROM project_form_responses WHERE \`createdAt\` >= ${weekStart}) AS forms_week,
         (SELECT CAST(COUNT(*) AS SIGNED) FROM project_form_responses WHERE \`createdAt\` >= ${prevWeekStart} AND \`createdAt\` < ${weekStart}) AS forms_prev
     `,
-    db.$queryRaw<
-      Array<{
-        newsletter_total: number;
-        newsletter_week: number;
-        entitlements_total: number;
-        entitlements_week: number;
-        cart_items: number;
-        downloads_total: number;
-        projects_total: number;
-        projects_published: number;
-        products_total: number;
-        products_published: number;
-        products_core: number;
-        products_resource: number;
-      }>
-    >`
+    sqlite
+      ? db.$queryRawUnsafe<
+          Array<{
+            newsletter_total: number;
+            newsletter_week: number;
+            entitlements_total: number;
+            entitlements_week: number;
+            cart_items: number;
+            downloads_total: number;
+            projects_total: number;
+            projects_published: number;
+            products_total: number;
+            products_published: number;
+            products_core: number;
+            products_resource: number;
+          }>
+        >(
+          `
+      SELECT
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM newsletter_subscribers) AS newsletter_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM newsletter_subscribers WHERE "createdAt" >= ?) AS newsletter_week,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM customer_entitlements) AS entitlements_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM customer_entitlements WHERE "createdAt" >= ?) AS entitlements_week,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM cart_items) AS cart_items,
+        (SELECT CAST(COALESCE(SUM("downloadsCount"), 0) AS INTEGER) FROM products) AS downloads_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM projects) AS projects_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM projects WHERE published = 1) AS projects_published,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM products) AS products_total,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM products WHERE published = 1) AS products_published,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM products WHERE "group" = 'core') AS products_core,
+        (SELECT CAST(COUNT(*) AS INTEGER) FROM products WHERE "group" = 'resource') AS products_resource
+    `,
+          weekStart,
+          weekStart,
+        )
+      : db.$queryRaw<
+          Array<{
+            newsletter_total: number;
+            newsletter_week: number;
+            entitlements_total: number;
+            entitlements_week: number;
+            cart_items: number;
+            downloads_total: number;
+            projects_total: number;
+            projects_published: number;
+            products_total: number;
+            products_published: number;
+            products_core: number;
+            products_resource: number;
+          }>
+        >`
       SELECT
         (SELECT CAST(COUNT(*) AS SIGNED) FROM newsletter_subscribers) AS newsletter_total,
         (SELECT CAST(COUNT(*) AS SIGNED) FROM newsletter_subscribers WHERE \`createdAt\` >= ${weekStart}) AS newsletter_week,
@@ -373,7 +478,24 @@ async function buildCharts(
       where: { country: { not: null } },
       _count: { _all: true },
     }),
-    db.$queryRaw<Array<{ label: string; count: number }>>`
+    isSqliteDatabase()
+      ? db.$queryRawUnsafe<Array<{ label: string; count: number }>>(
+          `
+      SELECT
+        CASE
+          WHEN COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) IS NULL THEN NULL
+          WHEN country IS NULL OR TRIM(country) = '' THEN COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), ''))
+          ELSE COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) || ' — ' || TRIM(country)
+        END AS label,
+        CAST(COUNT(*) AS INTEGER) AS count
+      FROM customers
+      WHERE COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) IS NOT NULL
+      GROUP BY 1
+      ORDER BY count DESC
+      LIMIT 8
+    `,
+        )
+      : db.$queryRaw<Array<{ label: string; count: number }>>`
       SELECT
         CASE
           WHEN COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) IS NULL THEN NULL

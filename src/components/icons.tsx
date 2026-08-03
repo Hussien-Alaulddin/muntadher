@@ -11,6 +11,26 @@ const base = {
   viewBox: "0 0 24 24",
 };
 
+/** أيقونة مكبر صوت — شارة البانر «جديد» */
+export function MegaphoneIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M3.5 10.5v3c0 .8.7 1.5 1.5 1.5h1.2l3.3 3.2c.7.7 1.8.2 1.8-.8V6.6c0-1-.11-1.5-1.8-.8L6.2 9H5c-.8 0-1.5.7-1.5 1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15.2 9.2a3.2 3.2 0 0 1 0 5.6M17.5 7a5.8 5.8 0 0 1 0 10"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** سهم يشير لجهة نهاية السطر في RTL (يسار) — يُستخدم بروابط "تصفح الكل" */
 export function ArrowEndIcon(props: IconProps) {
   return (
@@ -139,8 +159,25 @@ export function CheckIcon(props: IconProps) {
 export function MailIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <rect x="3" y="5.5" width="18" height="13" rx="2" />
-      <path d="m3.5 7 8.5 6 8.5-6" />
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m3.8 7.2 7.5 5.4c.4.3 1 .3 1.4 0l7.5-5.4" />
+    </svg>
+  );
+}
+
+export function PhoneIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+}
+
+export function MapPinIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 21s5.8-4.6 5.8-9.5a5.8 5.8 0 1 0-11.6 0C6.2 16.4 12 21 12 21z" />
+      <circle cx="12" cy="11.5" r="2" />
     </svg>
   );
 }
@@ -334,6 +371,87 @@ export function WhatsappIcon(props: IconProps) {
   );
 }
 
+export function YoutubeIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M23 12.2s0-3.1-.4-4.5c-.2-1-.9-1.7-1.8-2C19.2 5.2 12 5.2 12 5.2s-7.2 0-8.8.5c-1 .2-1.6 1-1.8 2C1 9.1 1 12.2 1 12.2s0 3.1.4 4.5c.2 1 .9 1.7 1.8 2 1.6.5 8.8.5 8.8.5s7.2 0 8.8-.5c1-.2 1.6-1 1.8-2 .4-1.4.4-4.5.4-4.5M9.8 15.5v-6.6l6.1 3.3z" />
+    </svg>
+  );
+}
+
+export function XIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M17.6 3.5h2.8l-6.1 7 7.2 10H16l-4.3-5.6L7 20.5H4.1l6.5-7.5L3.7 3.5H9l3.9 5.2zm-1 15.2h1.6L7.5 5.1H5.8z" />
+    </svg>
+  );
+}
+
+export function TiktokIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M19.6 8.2a5.7 5.7 0 0 1-3.3-1.1v7.1a5.7 5.7 0 1 1-4.9-5.6v2.8a2.9 2.9 0 1 0 2.1 2.8V2.5h2.8c.3 1.7 1.5 3.2 3.3 3.9z" />
+    </svg>
+  );
+}
+
+export function FacebookIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M14.5 8.5V6.8c0-.7.2-1.1 1.2-1.1H17V3h-2.3C11.8 3 10.5 4.6 10.5 7v1.5H8.5V11h2v10h3.5V11h2.4l.4-2.5z" />
+    </svg>
+  );
+}
+
+export function SnapchatIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M12 3.2c2.8 0 5.1 2.1 5.1 5.4 0 1.5-.3 2.6-.5 3.4.5.2 1 .4 1.6.4.5 0 .9-.1 1.1-.2.3-.1.5 0 .6.2s0 .5-.3.7c-.7.4-1.4.8-1.7 1.6-.2.5.1 1.1.5 1.5.7.8 1.6 1.1 1.6 1.1.3.1.4.3.4.5s-.2.4-.5.5c-.3.1-3 .7-4.1 2.4-.4.6-1.1.9-2.3.9s-1.9-.3-2.3-.9c-1.1-1.7-3.8-2.3-4.1-2.4-.3-.1-.5-.3-.5-.5s.1-.4.4-.5c0 0 .9-.3 1.6-1.1.4-.4.7-1 .5-1.5-.3-.8-1-1.2-1.7-1.6-.3-.2-.4-.5-.3-.7.1-.2.3-.3.6-.2.6.2 1.1.4 1.6.4.5 0 1-.2 1.6-.4-.2-.8-.5-1.9-.5-3.4 0-3.3 2.3-5.4 5.1-5.4" />
+    </svg>
+  );
+}
+
+export function DribbbleIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M5.2 9.2c3.4-.3 7.1.2 10.4 2.4M7.5 18.2c1.7-2.8 4-5.5 7.5-7.5M4.2 13.8c2.5 0 6.2-.1 10.3-2.8M16.8 5.6c-1.5 2.1-3.5 4.8-4.4 8.6" />
+    </svg>
+  );
+}
+
+export function GithubIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8 0 4.3 2.8 8 6.7 9.3.5.1.7-.2.7-.5v-1.8c-2.7.6-3.3-1.1-3.3-1.1-.4-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.2-4.5-1.1-4.5-4.9 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1 .8-.2 1.6-.3 2.5-.3s1.7.1 2.5.3c2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.8-2.3 4.6-4.5 4.9.4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5 3.9-1.3 6.7-5 6.7-9.3 0-5.4-4.4-9.8-9.8-9.8" />
+    </svg>
+  );
+}
+
+export function DiscordIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M19.3 5.2A17 17 0 0 0 15 3.8l-.4.8a15 15 0 0 1 3.1 1.2 12.5 12.5 0 0 0-11.4 0A15 15 0 0 1 9.4 4.6L9 3.8a17 17 0 0 0-4.3 1.4C2.2 9.1 1.5 12.8 1.8 16.5A17 17 0 0 0 7 19l.9-1.2a11 11 0 0 1-1.4-.7l.3-.3c2.9 1.3 6 1.3 8.8 0l.3.3c-.4.3-.9.5-1.4.7L17 19a17 17 0 0 0 5.2-2.5c.4-4-.5-7.6-2.9-11.3M8.7 14.4c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8m6.6 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8" />
+    </svg>
+  );
+}
+
+export function VimeoIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M22.4 7.2c-.1 2.3-1.7 5.5-4.8 9.5-3.2 4.2-5.9 6.3-8.1 6.3-1.4 0-2.5-1.3-3.5-3.8L4.1 12c-.7-2.4-1.4-4.8-2.2-7.2.9-.2 1.8-.3 2.5-.3 1.7 0 2.9 1.1 3.5 3.3.8 2.8 1.4 4.5 1.8 5.2.6 1.4 1.2 2.1 1.8 2.1.5 0 1.2-.8 2.1-2.3.9-1.6 1.4-2.8 1.5-3.6.2-1.4-.4-2.1-1.8-2.1-.6 0-1.3.1-2 .4 1.3-4.3 3.9-6.4 7.6-6.3 2.7.1 4 1.8 3.7 5.1" />
+    </svg>
+  );
+}
+
+export function MediumIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M4.2 7.2c0-.3-.1-.6-.4-.8L2.2 4.5v-.3h5.5l4.3 9.4 3.7-9.4H21v.3l-1.6 1.5c-.1.1-.2.3-.2.5v10.4c0 .2 0 .4.2.5l1.6 1.5v.3h-7.7v-.3l1.6-1.6c.2-.2.2-.2.2-.5V8.8l-4.5 11.4h-.6L4.6 8.8v7.7c0 .4.1.8.4 1.1l2 2.4v.3H2v-.3l2-2.4c.3-.3.4-.7.4-1.1z" />
+    </svg>
+  );
+}
+
 export const socialIconMap = {
   instagram: InstagramIcon,
   linkedin: LinkedinIcon,
@@ -342,7 +460,20 @@ export const socialIconMap = {
   pinterest: PinterestIcon,
   threads: ThreadsIcon,
   whatsapp: WhatsappIcon,
+  youtube: YoutubeIcon,
+  x: XIcon,
+  twitter: XIcon,
+  tiktok: TiktokIcon,
+  facebook: FacebookIcon,
+  snapchat: SnapchatIcon,
+  dribbble: DribbbleIcon,
+  github: GithubIcon,
+  discord: DiscordIcon,
+  vimeo: VimeoIcon,
+  medium: MediumIcon,
 } as const;
+
+export type SocialIconKey = keyof typeof socialIconMap;
 
 export const productTypeIconMap = {
   دورة: VideoIcon,

@@ -13,6 +13,7 @@ import type { BookletDetailView } from "@/lib/content";
 import { isFreePrice } from "@/lib/product-files";
 import { useShop } from "@/components/shop/shop-provider";
 import { Button } from "@/components/ui/button";
+import { userFacingMessage } from "@/lib/public-messages";
 
 export function PurchaseCard({
   booklet,
@@ -39,7 +40,9 @@ export function PurchaseCard({
         return;
       }
       if (!result.ok) {
-        setMessage(result.message ?? "تعذّر إتمام العملية");
+        setMessage(
+          userFacingMessage(result.message, "تعذّر إتمام العملية"),
+        );
         return;
       }
       router.refresh();
@@ -61,7 +64,9 @@ export function PurchaseCard({
         return;
       }
       if (!result.ok) {
-        setMessage(result.message ?? "تعذّر الإضافة للسلة");
+        setMessage(
+          userFacingMessage(result.message, "تعذّر الإضافة للسلة"),
+        );
         return;
       }
       setMessage("أُضيف إلى السلة");

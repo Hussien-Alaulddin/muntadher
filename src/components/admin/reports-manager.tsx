@@ -6,7 +6,6 @@ import {
   FileSpreadsheetIcon,
   LayersIcon,
   Loader2Icon,
-  MailIcon,
   MessagesSquareIcon,
   PackageIcon,
   RefreshCwIcon,
@@ -39,7 +38,6 @@ const REPORT_ICONS: Record<
   customers: UsersIcon,
   forms: MessagesSquareIcon,
   products: PackageIcon,
-  newsletter: MailIcon,
   content: LayersIcon,
 };
 

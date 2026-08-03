@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
   if (isPrivateObjectKey(key)) {
     return NextResponse.json(
-      { message: "استخدم مسار الملفات الخاصة" },
+      { message: "تعذّر الوصول إلى الملف" },
       { status: 400 },
     );
   }

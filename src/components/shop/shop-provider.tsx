@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { userFacingMessage } from "@/lib/public-messages";
 
 export type CartProduct = {
   id: string;
@@ -85,10 +86,17 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
-        return { ok: false, requireAuth: true, message: data.message };
+        return {
+          ok: false,
+          requireAuth: true,
+          message: userFacingMessage(data.message, "يلزم تسجيل الدخول أولاً"),
+        };
       }
       if (!res.ok) {
-        return { ok: false, message: data.message ?? "تعذّر الإضافة للسلة" };
+        return {
+          ok: false,
+          message: userFacingMessage(data.message, "تعذّر الإضافة للسلة"),
+        };
       }
       await refresh();
       return { ok: true };
@@ -117,10 +125,17 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
-        return { ok: false, requireAuth: true, message: data.message };
+        return {
+          ok: false,
+          requireAuth: true,
+          message: userFacingMessage(data.message, "يلزم تسجيل الدخول أولاً"),
+        };
       }
       if (!res.ok) {
-        return { ok: false, message: data.message ?? "تعذّر الحصول على المنتج" };
+        return {
+          ok: false,
+          message: userFacingMessage(data.message, "تعذّر الحصول على المنتج"),
+        };
       }
       await refresh();
       return { ok: true };

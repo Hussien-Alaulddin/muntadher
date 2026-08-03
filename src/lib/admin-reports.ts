@@ -5,7 +5,6 @@ export const REPORT_TYPES = [
   "customers",
   "forms",
   "products",
-  "newsletter",
   "content",
 ] as const;
 
@@ -37,11 +36,6 @@ export const REPORT_CATALOG: ReportMeta[] = [
     id: "products",
     title: "تقرير المنتجات والتحميلات",
     description: "المنتجات المنشورة وعدّادات التحميل",
-  },
-  {
-    id: "newsletter",
-    title: "تقرير النشرة البريدية",
-    description: "المشتركون الجدد وإجمالي القائمة",
   },
   {
     id: "content",
@@ -317,41 +311,6 @@ async function buildProductsReport(
   };
 }
 
-async function buildNewsletterReport(
-  db: PrismaClient,
-  generatedAt: string,
-  limit: number,
-): Promise<ReportPayload> {
-  const since = weekStartUtc();
-  const [total, week, subscribers] = await Promise.all([
-    db.newsletterSubscriber.count(),
-    db.newsletterSubscriber.count({ where: { createdAt: { gte: since } } }),
-    db.newsletterSubscriber.findMany({
-      orderBy: { createdAt: "desc" },
-      take: limit,
-      select: { email: true, createdAt: true },
-    }),
-  ]);
-
-  return {
-    type: "newsletter",
-    title: "تقرير النشرة البريدية",
-    generatedAt,
-    summary: [
-      { label: "إجمالي المشتركين", value: formatNumber(total) },
-      { label: "مشتركون آخر 7 أيام", value: formatNumber(week) },
-    ],
-    sections: [],
-    tables: [
-      {
-        title: "أحدث الاشتراكات",
-        headers: ["البريد", "تاريخ الاشتراك"],
-        rows: subscribers.map((s) => [s.email, formatDate(s.createdAt)]),
-      },
-    ],
-  };
-}
-
 async function buildContentReport(
   db: PrismaClient,
   generatedAt: string,
@@ -473,7 +432,6 @@ export async function buildReportPayload(
   const preview = Boolean(options.preview);
 
   const tableLimit = preview ? 12 : 100;
-  const newsletterLimit = preview ? 12 : 200;
   const fullLimit = preview ? 8 : 25;
 
   if (type === "customers") {
@@ -485,9 +443,6 @@ export async function buildReportPayload(
   if (type === "products") {
     return buildProductsReport(db, generatedAt, tableLimit);
   }
-  if (type === "newsletter") {
-    return buildNewsletterReport(db, generatedAt, newsletterLimit);
-  }
   if (type === "content") {
     return buildContentReport(db, generatedAt, preview ? 12 : 50);
   }
@@ -497,17 +452,15 @@ export async function buildReportPayload(
     buildCustomersReport(db, generatedAt, fullLimit),
     buildFormsReport(db, generatedAt, fullLimit),
   ]);
-  const [products, newsletter] = await Promise.all([
+  const [products, content] = await Promise.all([
     buildProductsReport(db, generatedAt, preview ? 8 : 20),
-    buildNewsletterReport(db, generatedAt, fullLimit),
+    buildContentReport(db, generatedAt, preview ? 8 : 50),
   ]);
-  const content = await buildContentReport(db, generatedAt, preview ? 8 : 50);
 
   return mergeReports(generatedAt, meta.title, [
     customers,
     forms,
     products,
-    newsletter,
     content,
   ]);
 }

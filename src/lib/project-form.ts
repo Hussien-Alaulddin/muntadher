@@ -128,8 +128,7 @@ export function personalizeHeading(heading: string, name: string) {
   return heading.replaceAll("{الاسم}", safe);
 }
 
-/** رابط زر طلب المشروع — الاستمارة الداخلية افتراضياً، أو رابط خارجي من الإعدادات */
-export function projectRequestHref(url: string | null | undefined) {
-  const trimmed = url?.trim();
-  return trimmed || "/project-request";
+/** رابط زر طلب المشروع — الاستمارة الداخلية فقط */
+export function projectRequestHref() {
+  return "/project-request";
 }

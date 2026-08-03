@@ -157,7 +157,7 @@ export async function upsertCustomerFromGoogle(
   }
 
   const prisma = getPrisma();
-  if (!prisma) throw new Error("قاعدة البيانات غير متاحة");
+  if (!prisma) throw new Error("الخدمة غير متاحة مؤقتاً، حاول بعد قليل");
 
   const name =
     profile.name?.trim() || email.split("@")[0] || "مستخدم منتظر";

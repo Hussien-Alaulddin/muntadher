@@ -6,7 +6,8 @@ import { Loader2Icon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * مؤشر خفيف أثناء التنقّل — بدون إعادة تركيب الصفحة كاملة.
+ * انتقال دخول الصفحة عند التنقّل بين أقسام لوحة التحكم
+ * (نفس أسلوب الموقع العام عبر key={pathname}).
  */
 export function AdminPageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -55,7 +56,10 @@ export function AdminPageTransition({ children }: { children: ReactNode }) {
           </div>
         </div>
       ) : null}
-      <div className={cn("admin-page-enter", pending && "opacity-90")}>
+      <div
+        key={pathname}
+        className={cn("animate-page-enter", pending && "opacity-90")}
+      >
         {children}
       </div>
     </div>

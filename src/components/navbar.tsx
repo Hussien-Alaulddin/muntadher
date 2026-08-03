@@ -12,17 +12,18 @@ import { useShop } from "@/components/shop/shop-provider";
 type NavbarProps = {
   designerName: string;
   avatarUrl: string | null;
-  projectRequestFormUrl: string | null;
+  navbarLogoUrl?: string | null;
 };
 
 export function Navbar({
   designerName,
   avatarUrl,
-  projectRequestFormUrl,
+  navbarLogoUrl,
 }: NavbarProps) {
   const [open, setOpen] = useState(false);
-  const ctaHref = projectRequestHref(projectRequestFormUrl);
+  const ctaHref = projectRequestHref();
   const { customer } = useShop();
+  const logoSrc = navbarLogoUrl?.trim() || null;
 
   const links = useMemo(() => {
     const items: { label: string; href: string }[] = navbar.links.map(
@@ -58,7 +59,18 @@ export function Navbar({
               />
             ) : null}
           </span>
-          <span className="text-body font-medium">{designerName}</span>
+          {logoSrc ? (
+            <Image
+              src={logoSrc}
+              alt={designerName}
+              width={160}
+              height={40}
+              className="h-5 w-auto max-w-[120px] object-contain object-right md:h-6 md:max-w-[140px]"
+              priority
+            />
+          ) : (
+            <span className="text-body font-medium">{designerName}</span>
+          )}
         </Link>
 
         <ul className="hidden items-center gap-[26px] md:flex">

@@ -2,6 +2,7 @@
 
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import type { ProjectGalleryItem, ProjectMetaItem } from "@/lib/content";
+import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
 import { PROJECT_CASE_IMAGE } from "@/lib/project-case-image";
 import { MediaUploader } from "@/components/admin/media-uploader";
 import { Button } from "@/components/ui/button";
@@ -186,18 +187,15 @@ export function GalleryListEditor({
       <div>
         <Label>{label}</Label>
         <p className="mt-1 text-xs text-muted-foreground">
-          {hint
-            ? `${hint} — `
-            : ""}
-          صور متتالية بمقاس ثابت {PROJECT_CASE_IMAGE.label} بكسل، تُعرض ملتصقة
-          بدون فواصل كما في بيهانس.
+          {hint ?? `مقاس كل صورة ${PROJECT_CASE_IMAGE.label}.`}
         </p>
       </div>
 
       {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed px-3 py-4 text-sm text-muted-foreground">
           لا توجد صور بعد. اضغط «إضافة عنصر» ثم ارفع صورة بمقاس{" "}
-          {PROJECT_CASE_IMAGE.label}.
+          {ADMIN_MEDIA_SIZES.projectGallery.width} ×{" "}
+          {ADMIN_MEDIA_SIZES.projectGallery.height} بكسل.
         </p>
       ) : (
         <div className="space-y-3">
@@ -227,6 +225,7 @@ export function GalleryListEditor({
                 folder="galleries"
                 accept="image"
                 fixedSize={caseSize}
+                hint={mediaSizeHint(ADMIN_MEDIA_SIZES.projectGallery)}
                 onChange={(url) =>
                   update(index, {
                     imageUrl: url.trim() || null,

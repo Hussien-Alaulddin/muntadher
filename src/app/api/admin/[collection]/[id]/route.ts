@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
+import { clampOrder } from "@/lib/admin-order";
 import { withDbRetry } from "@/lib/prisma";
 import {
   collectionListWhere,
@@ -33,7 +34,8 @@ export async function PATCH(request: Request, { params }: Params) {
 
   try {
     const payload = (await request.json()) as Record<string, unknown>;
-    const where = { id, ...collectionListWhere(collection) };
+    const listWhere = collectionListWhere(collection);
+    const where = { id, ...listWhere };
     const existing = await withDbRetry((prisma) =>
       getDelegate(prisma, collection).findFirst({ where }),
     );
@@ -41,12 +43,18 @@ export async function PATCH(request: Request, { params }: Params) {
       return NextResponse.json({ message: "العنصر غير موجود" }, { status: 404 });
     }
 
-    const item = await withDbRetry((prisma) =>
-      getDelegate(prisma, collection).update({
+    const data = pickFields(collection, payload) as Record<string, unknown>;
+    const item = await withDbRetry(async (prisma) => {
+      const delegate = getDelegate(prisma, collection);
+      if ("order" in data) {
+        const count = await delegate.count({ where: listWhere });
+        data.order = clampOrder(data.order, Math.max(1, count));
+      }
+      return delegate.update({
         where: { id },
-        data: pickFields(collection, payload),
-      }),
-    );
+        data,
+      });
+    });
 
     revalidateSite();
     return NextResponse.json({ item });

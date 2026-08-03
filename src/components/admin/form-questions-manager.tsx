@@ -38,6 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { clampOrder, maxOrderValue, nextOrderValue } from "@/lib/admin-order";
 
 type QuestionType =
   | "text"
@@ -159,9 +160,7 @@ export function FormQuestionsManager() {
   }, [load]);
 
   function openCreate() {
-    const next =
-      items.reduce((max, item) => Math.max(max, item.order), 0) + 1;
-    setDraft(emptyDraft(next));
+    setDraft(emptyDraft(nextOrderValue(items)));
     setOpen(true);
   }
 
@@ -195,7 +194,7 @@ export function FormQuestionsManager() {
       type: draft.type,
       required: draft.required,
       options,
-      order: draft.order,
+      order: clampOrder(draft.order, maxOrderValue(items, !draft.id)),
       enabled: draft.enabled,
     };
 
@@ -452,14 +451,21 @@ export function FormQuestionsManager() {
                   id="q-order"
                   type="number"
                   min={1}
+                  max={maxOrderValue(items, !draft.id)}
                   value={draft.order}
                   onChange={(e) =>
                     setDraft((d) => ({
                       ...d,
-                      order: Number(e.target.value) || 1,
+                      order: clampOrder(
+                        e.target.value,
+                        maxOrderValue(items, !d.id),
+                      ),
                     }))
                   }
                 />
+                <p className="text-xs text-muted-foreground">
+                  من 1 إلى {maxOrderValue(items, !draft.id)}
+                </p>
               </div>
             </div>
 

@@ -24,15 +24,15 @@ const stepIcons: Record<
 
 export function ProcessSteps() {
   return (
-    <section id="process-steps" className="pb-[45px] md:pb-[55px]">
+    <section id="process-steps" className="pb-[64px] md:pb-[80px]">
       <div className="container-site">
         <div className="mb-6 flex flex-col items-start gap-4 md:mb-8">
           <div className="flex w-full items-center gap-2">
             <SmileIcon className="size-6 shrink-0 text-accent-blue" />
             <h2 className="text-h2">{handbookPage.processHeading}</h2>
           </div>
-          <p className="max-w-[376px] text-justify text-lead text-ink">
-            {handbookPage.processParagraph}
+          <p className="max-w-[520px] text-justify text-lead text-ink">
+            {handbookPage.processParagraphs.join(" ")}
           </p>
         </div>
 
@@ -45,7 +45,6 @@ export function ProcessSteps() {
                 key={step.number}
                 className="flex flex-col gap-4 rounded-card bg-surface p-[17px] transition-colors duration-200 hover:bg-surface-alt"
               >
-                {/* العنوان يمين والأيقونة يسار — كما في المرجع */}
                 <div className="flex items-center gap-2.5">
                   <span className="flex-1 text-[17px] leading-[1.3] font-medium text-ink-title">
                     <span>{step.number}</span>
@@ -54,8 +53,8 @@ export function ProcessSteps() {
                   </span>
                   <Icon className="size-6 shrink-0 text-accent-blue" />
                 </div>
-                <p className="text-[14px] leading-[1.3] font-medium text-ink-muted">
-                  {step.description}
+                <p className="text-[14px] leading-[1.45] font-medium text-ink-muted">
+                  {step.paragraphs.join(" ")}
                 </p>
               </article>
             );

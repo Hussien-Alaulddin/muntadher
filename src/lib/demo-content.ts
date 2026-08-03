@@ -17,9 +17,12 @@ export const isDemoContentEnabled = process.env.DEMO_CONTENT !== "off";
 
 export const demoBanner = {
   enabled: true,
-  title: "محتوى مُبرز تجريبي — عنوان البانر يحدده المصمم",
-  contentType: "ويبينار مسجّل (تجريبي)",
-  href: "#",
+  badgeLabel: "جديد",
+  title: "توثيق المشاريع وبناء عرض احترافي",
+  contentType: "ويبينار (لقاء أونلاين)",
+  ctaLabel: "رابط المحاضرة المسجّلة",
+  href: "/products",
+  imageUrl: null as string | null,
 };
 
 export const demoAwards = trustPlaceholders.awards;

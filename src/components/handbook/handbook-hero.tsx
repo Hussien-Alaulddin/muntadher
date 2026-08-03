@@ -1,12 +1,34 @@
 import { handbookPage } from "@/lib/fixed-content";
-import { BookIcon } from "@/components/icons";
+import { LayersIcon } from "@/components/icons";
+
+/** يعرض نصاً مع دعم **غامق** بسيط */
+function RichParagraph({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <p className="max-w-[560px] text-justify text-lead text-ink">
+      {parts.map((part, index) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <strong key={index} className="font-bold">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </p>
+  );
+}
 
 export function HandbookHero() {
   return (
-    <section id="handbook-hero" className="pt-[50px] pb-[36px] md:pt-[70px] md:pb-[40px]">
+    <section
+      id="handbook-hero"
+      className="pt-[50px] pb-[64px] md:pt-[70px] md:pb-[80px]"
+    >
       <div className="container-site flex flex-col items-start gap-6">
         <span className="inline-flex items-center gap-1 rounded-[24px] border border-ink/10 px-3 py-1">
-          <BookIcon className="size-[22px] shrink-0 text-accent-blue" />
+          <LayersIcon className="size-[22px] shrink-0 text-accent-blue" />
           <span className="text-micro text-ink">{handbookPage.badge}</span>
         </span>
 
@@ -14,9 +36,7 @@ export function HandbookHero() {
           {handbookPage.heading}
         </h1>
 
-        <p className="max-w-[373px] text-justify text-lead text-ink">
-          {handbookPage.paragraph}
-        </p>
+        <RichParagraph text={handbookPage.paragraphs.join(" ")} />
       </div>
     </section>
   );

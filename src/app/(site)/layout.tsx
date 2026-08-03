@@ -21,7 +21,7 @@ export default async function SiteLayout({
         <Navbar
           designerName={settings.designerName}
           avatarUrl={settings.avatarUrl}
-          projectRequestFormUrl={settings.projectRequestFormUrl}
+          navbarLogoUrl={settings.navbarLogoUrl}
         />
         {children}
         <Footer settings={settings} socials={socials} />

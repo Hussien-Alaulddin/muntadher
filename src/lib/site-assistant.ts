@@ -10,7 +10,6 @@ export type ChatAssistantContext = {
   designerName: string;
   contactEmail: string | null;
   whatsappUrl: string | null;
-  projectRequestFormUrl: string | null;
 };
 
 export type ChatMessage = {
@@ -24,7 +23,7 @@ export function buildChatSuggestions(
   const suggestions: ChatSuggestion[] = [
     {
       label: "استمارة طلب مشروع",
-      href: projectRequestHref(ctx.projectRequestFormUrl),
+      href: projectRequestHref(),
     },
   ];
 
@@ -115,7 +114,7 @@ export function localAssistantReply(
 ): { reply: string; suggestions: ChatSuggestion[] } {
   const text = userText.trim().toLowerCase();
   const suggestions = buildChatSuggestions(ctx);
-  const projectHref = projectRequestHref(ctx.projectRequestFormUrl);
+  const projectHref = projectRequestHref();
   const contactHint = ctx.whatsappUrl
     ? "أو تواصل مباشرة عبر واتساب."
     : ctx.contactEmail
@@ -171,7 +170,7 @@ export function localAssistantReply(
   if (wantsMethod) {
     return {
       reply:
-        "منهجية العمل موضّحة في صفحة «كيف سنعمل سويا؟»: تعاون إبداعي، الاستراتيجية كمرجع، وتنفيذ بهوية لها قصة. يمكنك قراءتها من صفحة دليل العمل ثم تعبئة الاستمارة إن رغبت بالبدء.",
+        "منهجية العمل موضّحة في صفحة «كيف سنعمل سويًا؟»: تعاون إبداعي، أهداف المشروع كمرجع، ومراجعات منظمة عبر الهوية البصرية والسوشيال ميديا. يمكنك قراءتها من صفحة دليل العمل ثم تعبئة الاستمارة إن رغبت بالبدء.",
       suggestions: [
         { label: "منهجية العمل", href: "/handbook" },
         { label: "استمارة طلب مشروع", href: projectHref },

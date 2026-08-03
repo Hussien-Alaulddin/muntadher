@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkAdmin } from "@/lib/admin-auth";
+import { isSqliteDatabase } from "@/lib/db-dialect";
 import { getPrisma, resetPrisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -10,21 +11,28 @@ export async function GET(request: Request) {
   if (denied) return denied;
 
   const raw =
+    process.env.DATABASE_URL?.trim() ||
     process.env.MYSQL_DATABASE_URL?.trim() ||
     process.env.HOSTINGER_DATABASE_URL?.trim() ||
-    process.env.DATABASE_URL?.trim() ||
     "";
 
+  const sqlite = isSqliteDatabase() || raw.startsWith("file:");
   let host = "";
   let db = "";
   let user = "";
   let protocol = "";
   try {
-    const parsed = new URL(raw);
-    protocol = parsed.protocol.replace(":", "");
-    host = `${parsed.hostname}:${parsed.port || ""}`;
-    db = parsed.pathname.replace(/^\//, "");
-    user = parsed.username;
+    if (raw.startsWith("file:")) {
+      protocol = "sqlite";
+      db = raw.replace(/^file:/, "");
+      host = "local";
+    } else {
+      const parsed = new URL(raw);
+      protocol = parsed.protocol.replace(":", "");
+      host = `${parsed.hostname}:${parsed.port || ""}`;
+      db = parsed.pathname.replace(/^\//, "");
+      user = parsed.username;
+    }
   } catch {
     /* ignore */
   }
@@ -45,13 +53,23 @@ export async function GET(request: Request) {
 
   try {
     await prisma.$queryRaw`SELECT 1`;
-    const tables = await prisma.$queryRawUnsafe<Array<Record<string, string>>>(
-      "SHOW TABLES",
-    );
-    const tableNames = tables.map((row) => Object.values(row)[0]).filter(Boolean);
+    let tableNames: string[] = [];
+    if (sqlite) {
+      const tables = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+      );
+      tableNames = tables.map((row) => row.name).filter(Boolean);
+    } else {
+      const tables = await prisma.$queryRawUnsafe<Array<Record<string, string>>>(
+        "SHOW TABLES",
+      );
+      tableNames = tables.map((row) => Object.values(row)[0]).filter(Boolean);
+    }
     return NextResponse.json({
       ok: true,
-      message: "الاتصال بـ MySQL ناجح",
+      message: sqlite
+        ? "الاتصال بـ SQLite المحلي ناجح"
+        : "الاتصال بـ MySQL ناجح",
       protocol,
       host,
       db,

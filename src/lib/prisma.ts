@@ -11,23 +11,38 @@ const globalForPrisma = globalThis as unknown as {
 const PRISMA_CLIENT_REVISION = 7;
 
 /**
- * Hostinger أحياناً يعيد كتابة DATABASE_URL إلى Postgres (Supabase).
- * نفضّل MYSQL_DATABASE_URL إن وُجد.
+ * ترتيب الاختيار:
+ * 1) file: → SQLite محلي للتجربة
+ * 2) mysql:// من MYSQL_* (Hostinger قد يعيد كتابة DATABASE_URL)
+ * 3) DATABASE_URL كما هو
  */
 function resolveRawDatabaseUrl(): string | null {
   const candidates = [
+    process.env.DATABASE_URL,
     process.env.MYSQL_DATABASE_URL,
     process.env.HOSTINGER_DATABASE_URL,
-    process.env.DATABASE_URL,
   ];
+
   for (const raw of candidates) {
     const url = raw?.trim();
-    if (url?.startsWith("mysql://")) {
-      // ثبّت DATABASE_URL حتى أي كود يقرأه مباشرة يحصل على MySQL
+    if (url?.startsWith("file:")) {
       process.env.DATABASE_URL = url;
       return url;
     }
   }
+
+  for (const raw of [
+    process.env.MYSQL_DATABASE_URL,
+    process.env.HOSTINGER_DATABASE_URL,
+    process.env.DATABASE_URL,
+  ]) {
+    const url = raw?.trim();
+    if (url?.startsWith("mysql://")) {
+      process.env.DATABASE_URL = url;
+      return url;
+    }
+  }
+
   return process.env.DATABASE_URL?.trim() || null;
 }
 

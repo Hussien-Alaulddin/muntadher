@@ -9,6 +9,7 @@ import {
   type CourseDetailContent,
   type CourseIconName,
 } from "@/lib/course-detail";
+import { ADMIN_MEDIA_SIZES, mediaSizeHint } from "@/lib/admin-media-sizes";
 import { MediaUploader } from "@/components/admin/media-uploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,6 +127,7 @@ export function CourseDetailEditor({
           disabled={disabled}
           folder="courses"
           accept="image"
+          hint={mediaSizeHint(ADMIN_MEDIA_SIZES.courseHero)}
         />
       </Section>
 
@@ -428,6 +430,7 @@ export function CourseDetailEditor({
               disabled={disabled}
               folder="courses"
               accept="image"
+              hint={mediaSizeHint(ADMIN_MEDIA_SIZES.courseModule)}
               onChange={(imageUrl) =>
                 patchSection("modulesSection", {
                   modules: updateAt(detail.modulesSection.modules, index, {
@@ -553,6 +556,7 @@ export function CourseDetailEditor({
           disabled={disabled}
           folder="courses"
           accept="image"
+          hint={mediaSizeHint(ADMIN_MEDIA_SIZES.courseInteractive)}
           onChange={(imageUrl) => patchSection("interactive", { imageUrl })}
         />
       </Section>
@@ -681,6 +685,7 @@ export function CourseDetailEditor({
           disabled={disabled}
           folder="instructors"
           accept="image"
+          hint={mediaSizeHint(ADMIN_MEDIA_SIZES.instructor)}
         />
         <ListActions
           disabled={disabled}
@@ -1068,6 +1073,7 @@ function ImageListEditor({
               disabled={disabled}
               folder={folder}
               accept="image"
+              hint={mediaSizeHint(ADMIN_MEDIA_SIZES.courseGallery)}
               onChange={(next) =>
                 onChange(images.map((row, i) => (i === index ? next : row)))
               }

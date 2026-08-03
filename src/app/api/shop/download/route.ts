@@ -39,7 +39,7 @@ export async function GET(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }

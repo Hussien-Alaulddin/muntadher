@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "قاعدة البيانات غير متاحة" },
+      { message: "الخدمة غير متاحة مؤقتاً، حاول بعد قليل" },
       { status: 503 },
     );
   }
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const receiptImageUrl = String(body.receiptImageUrl ?? "").trim();
 
     if (!productId) {
-      return NextResponse.json({ message: "معرّف الدورة مطلوب" }, { status: 400 });
+      return NextResponse.json({ message: "بيانات الطلب غير مكتملة" }, { status: 400 });
     }
     if (!whatsappPhone || whatsappPhone.length < 8) {
       return NextResponse.json(

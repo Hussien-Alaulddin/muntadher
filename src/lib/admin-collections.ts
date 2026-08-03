@@ -64,8 +64,6 @@ export const collections = {
       "coverImageUrl",
       "brandGallery",
       "applicationGallery",
-      "externalCaseStudyUrl",
-      "externalCaseStudyLabel",
     ],
     required: ["slug", "title", "category"],
   },
@@ -173,6 +171,7 @@ type Delegate = {
   create(args: unknown): Promise<unknown>;
   update(args: unknown): Promise<unknown>;
   delete(args: unknown): Promise<unknown>;
+  count(args?: unknown): Promise<number>;
 };
 
 export function getDelegate(

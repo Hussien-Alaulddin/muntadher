@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const prisma = getPrisma();
   if (!prisma) {
     return NextResponse.json(
-      { message: "خدمة النشرة غير مهيأة بعد" },
+      { message: "تعذّر الاشتراك حالياً، حاول لاحقاً" },
       { status: 503 },
     );
   }

@@ -21,7 +21,6 @@ function defaultContext(): ChatAssistantContext {
     designerName: "منتظر",
     contactEmail: null,
     whatsappUrl: null,
-    projectRequestFormUrl: null,
   };
 }
 
@@ -39,7 +38,6 @@ async function loadContext(): Promise<ChatAssistantContext> {
       designerName: settings.designerName?.trim() || ctx.designerName,
       contactEmail: settings.contactEmail,
       whatsappUrl: settings.whatsappUrl,
-      projectRequestFormUrl: settings.projectRequestFormUrl,
     };
   } catch (error) {
     console.error("[chat:context]", error);
@@ -186,15 +184,7 @@ export async function POST(request: Request) {
         } catch (error) {
           console.error("[chat:stream]", error);
           const local = localAssistantReply(lastUser.content, ctx);
-          const quota =
-            error instanceof Error &&
-            (error.message === "gemini_quota" ||
-              error.name === "GeminiQuotaError");
-          const reply = formatChatReplyForUser(
-            quota
-              ? `${local.reply}\n\nملاحظة: تم تجاوز حد الاستخدام المجاني لـ Gemini مؤقتاً — تم الرد بالمساعد المحلي.`
-              : local.reply,
-          );
+          const reply = formatChatReplyForUser(local.reply);
           controller.enqueue(
             encoder.encode(encodeEvent({ type: "token", text: reply })),
           );
