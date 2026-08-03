@@ -144,31 +144,31 @@ async function daySeriesBundle(
     Array<{ source: string; day: string; count: number }>
   >`
     SELECT 'customers' AS source,
-           to_char(date_trunc('day', "createdAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD') AS day,
-           COUNT(*)::int AS count
+           DATE_FORMAT(\`createdAt\`, '%Y-%m-%d') AS day,
+           CAST(COUNT(*) AS SIGNED) AS count
     FROM customers
-    WHERE "createdAt" >= ${rangeStart}
+    WHERE \`createdAt\` >= ${rangeStart}
     GROUP BY 2
     UNION ALL
     SELECT 'forms',
-           to_char(date_trunc('day', "createdAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD'),
-           COUNT(*)::int
+           DATE_FORMAT(\`createdAt\`, '%Y-%m-%d'),
+           CAST(COUNT(*) AS SIGNED)
     FROM project_form_responses
-    WHERE "createdAt" >= ${rangeStart}
+    WHERE \`createdAt\` >= ${rangeStart}
     GROUP BY 2
     UNION ALL
     SELECT 'entitlements',
-           to_char(date_trunc('day', "createdAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD'),
-           COUNT(*)::int
+           DATE_FORMAT(\`createdAt\`, '%Y-%m-%d'),
+           CAST(COUNT(*) AS SIGNED)
     FROM customer_entitlements
-    WHERE "createdAt" >= ${rangeStart}
+    WHERE \`createdAt\` >= ${rangeStart}
     GROUP BY 2
     UNION ALL
     SELECT 'newsletter',
-           to_char(date_trunc('day', "createdAt" AT TIME ZONE 'UTC'), 'YYYY-MM-DD'),
-           COUNT(*)::int
+           DATE_FORMAT(\`createdAt\`, '%Y-%m-%d'),
+           CAST(COUNT(*) AS SIGNED)
     FROM newsletter_subscribers
-    WHERE "createdAt" >= ${rangeStart}
+    WHERE \`createdAt\` >= ${rangeStart}
     GROUP BY 2
   `;
 
@@ -209,13 +209,13 @@ async function buildKpis(
       }>
     >`
       SELECT
-        (SELECT COUNT(*)::int FROM customers) AS customers_total,
-        (SELECT COUNT(*)::int FROM customers WHERE "createdAt" >= ${weekStart}) AS customers_week,
-        (SELECT COUNT(*)::int FROM customers WHERE "createdAt" >= ${prevWeekStart} AND "createdAt" < ${weekStart}) AS customers_prev,
-        (SELECT COUNT(*)::int FROM customers WHERE country IS NOT NULL) AS customers_located,
-        (SELECT COUNT(*)::int FROM project_form_responses) AS forms_total,
-        (SELECT COUNT(*)::int FROM project_form_responses WHERE "createdAt" >= ${weekStart}) AS forms_week,
-        (SELECT COUNT(*)::int FROM project_form_responses WHERE "createdAt" >= ${prevWeekStart} AND "createdAt" < ${weekStart}) AS forms_prev
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM customers) AS customers_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM customers WHERE \`createdAt\` >= ${weekStart}) AS customers_week,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM customers WHERE \`createdAt\` >= ${prevWeekStart} AND \`createdAt\` < ${weekStart}) AS customers_prev,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM customers WHERE country IS NOT NULL) AS customers_located,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM project_form_responses) AS forms_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM project_form_responses WHERE \`createdAt\` >= ${weekStart}) AS forms_week,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM project_form_responses WHERE \`createdAt\` >= ${prevWeekStart} AND \`createdAt\` < ${weekStart}) AS forms_prev
     `,
     db.$queryRaw<
       Array<{
@@ -234,18 +234,18 @@ async function buildKpis(
       }>
     >`
       SELECT
-        (SELECT COUNT(*)::int FROM newsletter_subscribers) AS newsletter_total,
-        (SELECT COUNT(*)::int FROM newsletter_subscribers WHERE "createdAt" >= ${weekStart}) AS newsletter_week,
-        (SELECT COUNT(*)::int FROM customer_entitlements) AS entitlements_total,
-        (SELECT COUNT(*)::int FROM customer_entitlements WHERE "createdAt" >= ${weekStart}) AS entitlements_week,
-        (SELECT COUNT(*)::int FROM cart_items) AS cart_items,
-        (SELECT COALESCE(SUM("downloadsCount"), 0)::int FROM products) AS downloads_total,
-        (SELECT COUNT(*)::int FROM projects) AS projects_total,
-        (SELECT COUNT(*)::int FROM projects WHERE published = true) AS projects_published,
-        (SELECT COUNT(*)::int FROM products) AS products_total,
-        (SELECT COUNT(*)::int FROM products WHERE published = true) AS products_published,
-        (SELECT COUNT(*)::int FROM products WHERE "group" = 'core') AS products_core,
-        (SELECT COUNT(*)::int FROM products WHERE "group" = 'resource') AS products_resource
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM newsletter_subscribers) AS newsletter_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM newsletter_subscribers WHERE \`createdAt\` >= ${weekStart}) AS newsletter_week,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM customer_entitlements) AS entitlements_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM customer_entitlements WHERE \`createdAt\` >= ${weekStart}) AS entitlements_week,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM cart_items) AS cart_items,
+        (SELECT CAST(COALESCE(SUM(\`downloadsCount\`), 0) AS SIGNED) FROM products) AS downloads_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM projects) AS projects_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM projects WHERE published = 1) AS projects_published,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM products) AS products_total,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE published = 1) AS products_published,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE \`group\` = 'core') AS products_core,
+        (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE \`group\` = 'resource') AS products_resource
     `,
     db.projectFormResponse.groupBy({
       by: ["status"],
@@ -378,9 +378,9 @@ async function buildCharts(
         CASE
           WHEN COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) IS NULL THEN NULL
           WHEN country IS NULL OR TRIM(country) = '' THEN COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), ''))
-          ELSE COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) || ' — ' || TRIM(country)
+          ELSE CONCAT(COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')), ' — ', TRIM(country))
         END AS label,
-        COUNT(*)::int AS count
+        CAST(COUNT(*) AS SIGNED) AS count
       FROM customers
       WHERE COALESCE(NULLIF(TRIM(region), ''), NULLIF(TRIM(city), '')) IS NOT NULL
       GROUP BY 1
