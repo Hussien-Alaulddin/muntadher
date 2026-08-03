@@ -1,15 +1,6 @@
 /**
  * يفرض استخدام رابط MySQL حتى لو Hostinger أعاد كتابة DATABASE_URL
  * إلى رابط Postgres (مثل ربط Supabase التلقائي).
- *
- * الأولوية:
- * 1) MYSQL_DATABASE_URL
- * 2) HOSTINGER_DATABASE_URL
- * 3) DATABASE_URL إن كان mysql://
- *
- * الاستخدام:
- *   node scripts/with-mysql-url.js prisma generate
- *   node scripts/with-mysql-url.js next build
  */
 require("./load-persistent-env");
 
@@ -17,21 +8,33 @@ const { spawnSync } = require("child_process");
 
 function resolveMysqlUrl() {
   const candidates = [
-    process.env.MYSQL_DATABASE_URL,
-    process.env.HOSTINGER_DATABASE_URL,
-    process.env.DATABASE_URL,
+    ["MYSQL_DATABASE_URL", process.env.MYSQL_DATABASE_URL],
+    ["HOSTINGER_DATABASE_URL", process.env.HOSTINGER_DATABASE_URL],
+    ["DATABASE_URL", process.env.DATABASE_URL],
   ];
-  for (const raw of candidates) {
+  for (const [name, raw] of candidates) {
     const url = (raw || "").trim();
-    if (url.startsWith("mysql://")) return url;
+    if (url.startsWith("mysql://")) return { name, url };
   }
   return null;
 }
 
-const mysqlUrl = resolveMysqlUrl();
-if (mysqlUrl) {
-  process.env.DATABASE_URL = mysqlUrl;
+function logMysqlTarget(source, url) {
+  try {
+    const parsed = new URL(url);
+    console.log(
+      `[with-mysql-url] المصدر=${source} user=${parsed.username} host=${parsed.hostname}:${parsed.port || "3306"} db=${parsed.pathname.replace(/^\//, "")} passLen=${parsed.password.length}`,
+    );
+  } catch (error) {
+    console.warn("[with-mysql-url] تعذّر تحليل الرابط:", error.message);
+  }
+}
+
+const resolved = resolveMysqlUrl();
+if (resolved) {
+  process.env.DATABASE_URL = resolved.url;
   console.log("[with-mysql-url] تم ضبط DATABASE_URL من رابط MySQL");
+  logMysqlTarget(resolved.name, resolved.url);
 } else {
   console.warn(
     "[with-mysql-url] لا يوجد MYSQL_DATABASE_URL / رابط mysql:// صالح",
