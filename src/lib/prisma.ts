@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /** يُزاد عند تغيير الـ schema حتى لا يبقى عميل قديم في ذاكرة Next */
-const PRISMA_CLIENT_REVISION = 6;
+const PRISMA_CLIENT_REVISION = 7;
 
 /**
  * Hostinger أحياناً يعيد كتابة DATABASE_URL إلى Postgres (Supabase).
@@ -22,17 +22,22 @@ function resolveRawDatabaseUrl(): string | null {
   ];
   for (const raw of candidates) {
     const url = raw?.trim();
-    if (url?.startsWith("mysql://")) return url;
+    if (url?.startsWith("mysql://")) {
+      // ثبّت DATABASE_URL حتى أي كود يقرأه مباشرة يحصل على MySQL
+      process.env.DATABASE_URL = url;
+      return url;
+    }
   }
   return process.env.DATABASE_URL?.trim() || null;
 }
 
-const databaseUrl = normalizeDatabaseUrl(resolveRawDatabaseUrl());
-const directUrl = normalizeDatabaseUrl(
-  process.env.DIRECT_URL?.trim() || resolveRawDatabaseUrl(),
-);
+function resolvedDatabaseUrl(): string | null {
+  return normalizeDatabaseUrl(resolveRawDatabaseUrl());
+}
 
-export const isDatabaseConfigured = Boolean(databaseUrl);
+export function isDatabaseConfigured() {
+  return Boolean(resolvedDatabaseUrl());
+}
 
 function createPrismaClient(url: string) {
   return new PrismaClient({
@@ -44,15 +49,13 @@ function createPrismaClient(url: string) {
 }
 
 /**
- * يرجّع عميل Prisma، أو null لو ما تم ضبط DATABASE_URL بعد.
- * الموقع لازم يشتغل قبل ربط قاعدة البيانات، فطبقة المحتوى تتعامل مع null
- * بعرض المحتوى الابتدائي (placeholder) بدل ما تنكسر الصفحة.
+ * يرجّع عميل Prisma، أو null لو ما تم ضبط رابط MySQL بعد.
  */
 export function getPrisma(): PrismaClient | null {
+  const databaseUrl = resolvedDatabaseUrl();
   if (!databaseUrl) return null;
 
   const cached = globalForPrisma.prisma;
-  // بعد prisma generate قد يبقى عميل قديم في globalThis بدون النماذج/الحقول الجديدة
   const stale =
     cached &&
     (globalForPrisma.prismaRevision !== PRISMA_CLIENT_REVISION ||
@@ -72,7 +75,6 @@ export function getPrisma(): PrismaClient | null {
   return globalForPrisma.prisma ?? null;
 }
 
-/** إعادة إنشاء العميل بعد انقطاع الاتصال */
 export async function resetPrisma() {
   if (globalForPrisma.prisma) {
     await globalForPrisma.prisma.$disconnect().catch(() => undefined);
@@ -86,9 +88,6 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * تنفيذ استعلام مع إعادة محاولة تلقائية عند أخطاء الشبكة/الاتصال.
- */
 export async function withDbRetry<T>(
   operation: (prisma: PrismaClient) => Promise<T>,
   attempts = 3,
@@ -98,7 +97,9 @@ export async function withDbRetry<T>(
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const prisma = getPrisma();
     if (!prisma) {
-      throw new Error("قاعدة البيانات غير مربوطة: اضبط DATABASE_URL");
+      throw new Error(
+        "قاعدة البيانات غير مربوطة: اضبط MYSQL_DATABASE_URL أو DATABASE_URL",
+      );
     }
 
     try {
@@ -120,7 +121,9 @@ export async function withDbRetry<T>(
   throw lastError;
 }
 
-/** رابط مباشر للـ migrations إن وُجد، وإلا نفس DATABASE_URL */
 export function getDirectDatabaseUrl() {
-  return directUrl ?? databaseUrl;
+  return (
+    normalizeDatabaseUrl(process.env.DIRECT_URL?.trim() || null) ??
+    resolvedDatabaseUrl()
+  );
 }
