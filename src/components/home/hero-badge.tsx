@@ -9,7 +9,7 @@ const DELETE_MS = 40;
 const HOLD_MS = 2800;
 
 export function HeroBadge({ brandMarkUrl }: { brandMarkUrl: string | null }) {
-  const roles = hero.badgeRoles;
+  const roles: readonly string[] = hero.badgeRoles;
   const [index, setIndex] = useState(0);
   const [display, setDisplay] = useState("");
   const [phase, setPhase] = useState<"typing" | "holding" | "deleting">(
