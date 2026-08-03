@@ -26,7 +26,7 @@ function createPrismaClient(url: string) {
 
 /**
  * يرجّع عميل Prisma، أو null لو ما تم ضبط DATABASE_URL بعد.
- * الموقع لازم يشتغل قبل ربط Supabase، فطبقة المحتوى تتعامل مع null
+ * الموقع لازم يشتغل قبل ربط قاعدة البيانات، فطبقة المحتوى تتعامل مع null
  * بعرض المحتوى الابتدائي (placeholder) بدل ما تنكسر الصفحة.
  */
 export function getPrisma(): PrismaClient | null {
@@ -69,7 +69,6 @@ function delay(ms: number) {
 
 /**
  * تنفيذ استعلام مع إعادة محاولة تلقائية عند أخطاء الشبكة/الاتصال.
- * يقلّل ظهور أخطاء Supabase المؤقتة في اللوحة والموقع.
  */
 export async function withDbRetry<T>(
   operation: (prisma: PrismaClient) => Promise<T>,

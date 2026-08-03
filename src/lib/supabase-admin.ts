@@ -105,6 +105,10 @@ export function storagePathFromPublicUrl(url: string): string | null {
 }
 
 export async function deleteStorageObjectByUrl(url: string): Promise<boolean> {
+  const { deleteLocalObjectByUrl } = await import("@/lib/media-access");
+  const localDeleted = await deleteLocalObjectByUrl(url);
+  if (localDeleted) return true;
+
   if (!isSupabaseStorageConfigured()) return false;
   const objectPath = storagePathFromPublicUrl(url);
   if (!objectPath) return false;

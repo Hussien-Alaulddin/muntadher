@@ -1,4 +1,4 @@
-// قاعدة بيانات منتظر — Supabase / PostgreSQL عبر Prisma.
+// قاعدة بيانات منتظر — Hostinger MySQL عبر Prisma.
 // كل محتوى موصوف بـ "dynamic" في page-home.json له جدول هنا،
 // عشان لوحة تحكم المصمم تقدر تديره كامل بدون تعديل كود.
 
@@ -7,9 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 /// إعدادات الموقع العامة — صف واحد فقط (singleton) مفتاحه id = "default"

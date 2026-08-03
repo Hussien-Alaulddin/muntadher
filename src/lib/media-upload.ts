@@ -189,43 +189,39 @@ export function buildObjectKey(folder: string, mime: string, filename: string) {
   return objectKey;
 }
 
-function resolveInsideRoot(rootDir: string, objectKey: string): string {
-  if (!isSafeRelativeKey(objectKey)) {
-    throw new Error("مسار ملف غير صالح");
-  }
-  const root = path.resolve(rootDir);
-  const absolute = path.resolve(root, objectKey);
-  if (absolute !== root && !absolute.startsWith(root + path.sep)) {
-    throw new Error("مسار ملف خارج المجلد المسموح");
-  }
-  return absolute;
-}
-
-/** حفظ محلي في public/uploads — للملفات التسويقية العامة فقط */
+/** حفظ محلي للملفات التسويقية العامة (MEDIA_ROOT/public أو public/uploads) */
 export async function saveLocalUpload(
   objectKey: string,
   bytes: Buffer,
 ): Promise<string> {
-  const root = path.join(process.cwd(), "public", "uploads");
-  const absolute = resolveInsideRoot(root, objectKey);
+  const {
+    publicMediaRootDir,
+    publicMediaUrlForKey,
+    resolveMediaAbsolutePath,
+  } = await import("@/lib/media-paths");
+  const absolute = resolveMediaAbsolutePath(publicMediaRootDir(), objectKey);
   await mkdir(path.dirname(absolute), { recursive: true });
   await writeFile(absolute, bytes);
-  return `/uploads/${objectKey.split(path.sep).join("/")}`;
+  return publicMediaUrlForKey(objectKey);
 }
 
 /**
- * حفظ محلي خاص خارج public/ — لا يُخدم مباشرة من الويب.
+ * حفظ محلي خاص — لا يُخدم مباشرة من الويب.
  * الوصول عبر /api/media/local بعد التحقق من الصلاحية.
  */
 export async function saveLocalPrivateUpload(
   objectKey: string,
   bytes: Buffer,
 ): Promise<string> {
-  const root = path.join(process.cwd(), "storage", "private");
-  const absolute = resolveInsideRoot(root, objectKey);
+  const {
+    privateMediaRootDir,
+    privateMediaUrlForKey,
+    resolveMediaAbsolutePath,
+  } = await import("@/lib/media-paths");
+  const absolute = resolveMediaAbsolutePath(privateMediaRootDir(), objectKey);
   await mkdir(path.dirname(absolute), { recursive: true });
   await writeFile(absolute, bytes);
-  return `/api/media/local?key=${encodeURIComponent(objectKey.split(path.sep).join("/"))}`;
+  return privateMediaUrlForKey(objectKey);
 }
 
 export type { MediaKind };

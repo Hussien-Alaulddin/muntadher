@@ -45,7 +45,10 @@ export function isAllowedReceiptImageUrl(
   // مسارات نسبية من نفس التطبيق فقط
   if (!trimmed.includes("://")) {
     if (trimmed.startsWith(`/uploads/${prefix}`)) return true;
-    if (trimmed.startsWith("/api/media/local?")) {
+    if (
+      trimmed.startsWith("/api/media/local?") ||
+      trimmed.startsWith("/api/media/file?")
+    ) {
       try {
         const key = new URL(trimmed, "http://local.invalid").searchParams.get(
           "key",
@@ -70,7 +73,10 @@ export function isAllowedReceiptImageUrl(
 
   if (parsed.pathname.startsWith(`/uploads/${prefix}`)) return true;
 
-  if (parsed.pathname.startsWith("/api/media/local")) {
+  if (
+    parsed.pathname.startsWith("/api/media/local") ||
+    parsed.pathname.startsWith("/api/media/file")
+  ) {
     const key = parsed.searchParams.get("key");
     return Boolean(key?.startsWith(prefix) && !key.includes(".."));
   }
@@ -94,7 +100,10 @@ export function isAllowedAvatarUrl(url: string, customerId: string): boolean {
 
   if (!trimmed.includes("://")) {
     if (trimmed.startsWith(`/uploads/${prefix}`)) return true;
-    if (trimmed.startsWith("/api/media/local?")) {
+    if (
+      trimmed.startsWith("/api/media/local?") ||
+      trimmed.startsWith("/api/media/file?")
+    ) {
       try {
         const key = new URL(trimmed, "http://local.invalid").searchParams.get(
           "key",
@@ -127,7 +136,10 @@ export function isAllowedAvatarUrl(url: string, customerId: string): boolean {
 
   if (parsed.pathname.startsWith(`/uploads/${prefix}`)) return true;
 
-  if (parsed.pathname.startsWith("/api/media/local")) {
+  if (
+    parsed.pathname.startsWith("/api/media/local") ||
+    parsed.pathname.startsWith("/api/media/file")
+  ) {
     const key = parsed.searchParams.get("key");
     return Boolean(key?.startsWith(prefix) && !key.includes(".."));
   }

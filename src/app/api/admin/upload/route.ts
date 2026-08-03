@@ -103,10 +103,10 @@ export async function POST(request: Request) {
       storage: uploaded.storage,
       bucket: uploaded.bucket,
       contentType,
-      ...(uploaded.storage === "local"
+      ...(uploaded.storage === "local" && !process.env.MEDIA_ROOT?.trim()
         ? {
             warning:
-              "تم الحفظ محلياً. لرفع دائم على Supabase أضف SUPABASE_SERVICE_ROLE_KEY وBUCKET_NAME في .env",
+              "تم الحفظ داخل المشروع. على Hostinger اضبط MEDIA_ROOT لمجلد دائم خارج النشر.",
           }
         : {}),
     });
@@ -134,11 +134,16 @@ export async function DELETE(request: Request) {
     }
 
     const deleted = await deleteStorageObjectByUrl(url);
-    if (!deleted && url.startsWith("/uploads/")) {
+    if (
+      !deleted &&
+      (url.startsWith("/uploads/") ||
+        url.startsWith("/api/media/file?") ||
+        url.startsWith("/api/media/local?"))
+    ) {
       return NextResponse.json({
         ok: true,
         deleted: false,
-        message: "التخزين المحلي — احذف الملف يدوياً إن لزم",
+        message: "تعذّر العثور على الملف محلياً",
       });
     }
 
@@ -146,7 +151,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json(
         {
           message:
-            "تعذّر حذف الملف من Storage (قد لا يكون من bucket الموقع)",
+            "تعذّر حذف الملف من التخزين (قد لا يكون من تخزين الموقع)",
         },
         { status: 404 },
       );

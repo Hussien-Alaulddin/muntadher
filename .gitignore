@@ -10,10 +10,12 @@ build
 *.tsbuildinfo
 next-env.d.ts
 
-# رفع محلي مؤقت — الملفات الدائمة تكون على Supabase Storage
+# رفع محلي مؤقت للتطوير — على Hostinger استخدم MEDIA_ROOT خارج النشر
 public/uploads/**
 !public/uploads/.gitkeep
 
-# ملفات خاصة محلية (إيصالات / دروس) — لا تُرفع للمستودع
+# ملفات خاصة محلية — لا تُرفع للمستودع
 storage/private/**
 !storage/private/.gitkeep
+
+hostinger.env

@@ -1,7 +1,16 @@
 import { createReadStream, existsSync } from "fs";
+import { unlink } from "fs/promises";
 import path from "path";
 import { Readable } from "stream";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  getMediaRoot,
+  preferLocalMediaStorage,
+  privateMediaRootDir,
+  publicMediaRootDir,
+  publicMediaUrlForKey,
+  resolveMediaAbsolutePath,
+} from "@/lib/media-paths";
 import {
   getMediaBucket,
   getSupabaseAdmin,
@@ -50,23 +59,24 @@ export type ResolvedMediaRef = {
 
 /**
  * يستخرج مرجع التخزين من رابط محفوظ أو مفتاح كائن.
- * يدعم: Supabase public/sign، /uploads/، /api/media/local?key=
+ * يدعم: Supabase public/sign، /uploads/، /api/media/file، /api/media/local
  */
 export function resolveMediaRef(urlOrKey: string): ResolvedMediaRef | null {
   const raw = urlOrKey.trim();
   if (!raw) return null;
 
-  if (raw.startsWith("/api/media/local?")) {
+  if (raw.startsWith("/api/media/local?") || raw.startsWith("/api/media/file?")) {
     try {
       const key = new URL(raw, "http://local.invalid").searchParams.get("key");
       if (!key || key.includes("..")) return null;
       const objectKey = key.replace(/^\/+/, "");
+      const isFileRoute = raw.startsWith("/api/media/file?");
       return {
         objectKey,
         bucket: bucketForObjectKey(objectKey),
         isPrivate: isPrivateObjectKey(objectKey),
-        localPrivate: true,
-        localPublic: false,
+        localPrivate: !isFileRoute,
+        localPublic: isFileRoute || !isPrivateObjectKey(objectKey),
       };
     } catch {
       return null;
@@ -165,18 +175,18 @@ export async function ensurePrivateMediaBucket(client: SupabaseClient) {
 
 /** رابط للتخزين في قاعدة البيانات بعد الرفع */
 export function storedUrlForUpload(objectKey: string, bucket: string): string {
-  if (!isSupabaseStorageConfigured()) {
+  if (preferLocalMediaStorage() || !isSupabaseStorageConfigured()) {
     if (isPrivateObjectKey(objectKey)) {
       return `/api/media/local?key=${encodeURIComponent(objectKey)}`;
     }
-    return `/uploads/${objectKey}`;
+    return publicMediaUrlForKey(objectKey);
   }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return isPrivateObjectKey(objectKey)
       ? `/api/media/local?key=${encodeURIComponent(objectKey)}`
-      : `/uploads/${objectKey}`;
+      : publicMediaUrlForKey(objectKey);
   }
 
   // حتى للملفات الخاصة: نحفظ شكل URL قابل لاستخراج المسار (لا يُعتمد عليه للوصول المباشر)
@@ -197,11 +207,15 @@ export async function createSignedMediaUrl(
     return null;
   }
 
-  if (ref.localPublic) {
-    return `/uploads/${ref.objectKey}`;
+  if (ref.localPublic || (rawLooksLikeLocalPublic(urlOrKey) && !ref.isPrivate)) {
+    return publicMediaUrlForKey(ref.objectKey);
   }
 
-  if (ref.localPrivate || (ref.isPrivate && !isSupabaseStorageConfigured())) {
+  if (
+    ref.localPrivate ||
+    (ref.isPrivate &&
+      (preferLocalMediaStorage() || !isSupabaseStorageConfigured()))
+  ) {
     const { createSignedLocalMediaUrl } = await import("@/lib/media-local-sign");
     return (
       createSignedLocalMediaUrl({
@@ -244,21 +258,69 @@ export async function createSignedMediaUrl(
   return null;
 }
 
+function rawLooksLikeLocalPublic(urlOrKey: string) {
+  return (
+    urlOrKey.startsWith("/uploads/") ||
+    urlOrKey.startsWith("/api/media/file?")
+  );
+}
+
 export function localPrivateAbsolutePath(objectKey: string) {
-  const key = objectKey.replace(/\\/g, "/").replace(/^\/+/, "");
-  if (
-    !key ||
-    key.includes("\0") ||
-    key.split("/").some((part) => !part || part === "." || part === "..")
-  ) {
-    throw new Error("مسار ملف غير صالح");
+  return resolveMediaAbsolutePath(privateMediaRootDir(), objectKey);
+}
+
+export function localPublicAbsolutePath(objectKey: string) {
+  return resolveMediaAbsolutePath(publicMediaRootDir(), objectKey);
+}
+
+export function localPublicFileExists(objectKey: string) {
+  try {
+    return existsSync(localPublicAbsolutePath(objectKey));
+  } catch {
+    return false;
   }
-  const root = path.resolve(process.cwd(), "storage", "private");
-  const absolute = path.resolve(root, key);
-  if (absolute !== root && !absolute.startsWith(root + path.sep)) {
-    throw new Error("مسار ملف خارج المجلد المسموح");
+}
+
+export function openLocalPublicReadStream(objectKey: string) {
+  try {
+    const absolute = localPublicAbsolutePath(objectKey);
+    if (!existsSync(absolute)) return null;
+    return createReadStream(absolute);
+  } catch {
+    return null;
   }
-  return absolute;
+}
+
+/** حذف ملف محلي من رابط محفوظ */
+export async function deleteLocalObjectByUrl(url: string): Promise<boolean> {
+  const ref = resolveMediaRef(url);
+  if (!ref) return false;
+  if (!ref.localPrivate && !ref.localPublic && !url.startsWith("/uploads/")) {
+    if (!getMediaRoot()) return false;
+  }
+
+  const candidates = [
+    ref.localPrivate || ref.isPrivate
+      ? localPrivateAbsolutePath(ref.objectKey)
+      : null,
+    !ref.isPrivate ? localPublicAbsolutePath(ref.objectKey) : null,
+    // توافق مسارات قديمة
+    path.join(process.cwd(), "public", "uploads", ref.objectKey),
+    path.join(process.cwd(), "storage", "private", ref.objectKey),
+  ].filter(Boolean) as string[];
+
+  let deleted = false;
+  for (const absolute of candidates) {
+    try {
+      if (existsSync(absolute)) {
+        await unlink(absolute);
+        deleted = true;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return deleted;
 }
 
 export function localPrivateFileExists(objectKey: string) {

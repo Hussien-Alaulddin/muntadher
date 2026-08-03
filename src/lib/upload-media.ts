@@ -5,6 +5,7 @@ import {
   isPrivateObjectKey,
   storedUrlForUpload,
 } from "@/lib/media-access";
+import { preferLocalMediaStorage } from "@/lib/media-paths";
 import {
   saveLocalPrivateUpload,
   saveLocalUpload,
@@ -25,7 +26,10 @@ export async function uploadMediaObject(options: {
   const privateObject = isPrivateObjectKey(objectKey);
   const bucket = bucketForObjectKey(objectKey);
 
-  if (isSupabaseStorageConfigured()) {
+  const useSupabase =
+    !preferLocalMediaStorage() && isSupabaseStorageConfigured();
+
+  if (useSupabase) {
     const supabase = getSupabaseAdmin();
     if (!supabase) {
       throw new Error("إعدادات التخزين غير مكتملة");
