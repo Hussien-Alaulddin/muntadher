@@ -115,19 +115,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
-  const isLogin = pathname === "/admin/login";
   const { formCount: newFormCount, customerCount: newCustomerCount } =
-    useAdminFormNotifications(!isLogin);
+    useAdminFormNotifications(true);
 
   useEffect(() => {
-    if (isLogin) return;
     const timer = window.setTimeout(() => prefetchAdminNav(), 50);
     return () => window.clearTimeout(timer);
-  }, [isLogin]);
-
-  if (isLogin) {
-    return <>{children}</>;
-  }
+  }, []);
 
   async function logout() {
     setLoggingOut(true);

@@ -49,9 +49,11 @@ function GoogleIcon({ className }: { className?: string }) {
 export function AuthForm({
   mode,
   siteName,
+  googleEnabled = true,
 }: {
   mode: Mode;
   siteName: string;
+  googleEnabled?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -120,22 +122,26 @@ export function AuthForm({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full gap-2"
-          asChild
-        >
-          <a href={googleHref}>
-            <GoogleIcon className="size-4" />
-            المتابعة مع Google
-          </a>
-        </Button>
+        {googleEnabled ? (
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2"
+              asChild
+            >
+              <a href={googleHref}>
+                <GoogleIcon className="size-4" />
+                المتابعة مع Google
+              </a>
+            </Button>
 
-        <div className="relative py-1 text-center text-xs text-ink-muted">
-          <span className="absolute inset-x-0 top-1/2 border-t border-line" />
-          <span className="relative bg-card px-3">أو بالبريد</span>
-        </div>
+            <div className="relative py-1 text-center text-xs text-ink-muted">
+              <span className="absolute inset-x-0 top-1/2 border-t border-line" />
+              <span className="relative bg-card px-3">أو بالبريد</span>
+            </div>
+          </>
+        ) : null}
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           {mode === "register" ? (

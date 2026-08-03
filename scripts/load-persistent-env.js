@@ -11,12 +11,15 @@ function candidates() {
   const list = [
     process.env.HOSTINGER_ENV_FILE,
     path.join(domainRoot, "muntadhar.env"),
+    path.join(domainRoot, "public_html", "muntadhar.env"),
+    path.join(domainRoot, "private", "muntadhar.env"),
     path.join(home, "muntadhar.env"),
     path.join(home, "media", "..", "muntadhar.env"),
     // من داخل .builds/source/repository اصعد إلى جذر الدومين
     path.resolve(process.cwd(), "../../../muntadhar.env"),
     path.resolve(process.cwd(), "../../muntadhar.env"),
     path.resolve(process.cwd(), "../muntadhar.env"),
+    path.resolve(process.cwd(), "muntadhar.env"),
   ];
   return [...new Set(list.filter(Boolean).map((p) => path.resolve(p)))];
 }

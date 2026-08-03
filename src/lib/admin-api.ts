@@ -37,6 +37,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
+    if (
+      res.status === 401 &&
+      typeof window !== "undefined" &&
+      !path.startsWith("/api/admin/auth")
+    ) {
+      const here = window.location.pathname;
+      if (here.startsWith("/admin") && here !== "/admin/login") {
+        const login = new URL("/admin/login", window.location.origin);
+        login.searchParams.set("next", here);
+        window.location.replace(login.toString());
+        return new Promise<T>(() => {});
+      }
+    }
     throw new AdminApiError(await parseError(res), res.status);
   }
 
