@@ -49,11 +49,48 @@ export async function GET(request: Request) {
   if (denied) return denied;
 
   const confirm = new URL(request.url).searchParams.get("confirm");
+  const diagnose = new URL(request.url).searchParams.get("diagnose");
+
+  if (diagnose === "1") {
+    try {
+      const source = process.env.SOURCE_DATABASE_URL?.trim();
+      if (!source?.startsWith("postgres")) {
+        return NextResponse.json(
+          { ok: false, message: "SOURCE_DATABASE_URL غير مضبوط" },
+          { status: 400 },
+        );
+      }
+      await resetPrisma();
+      const prisma = getPrisma();
+      if (!prisma) {
+        return NextResponse.json(
+          { ok: false, message: "MySQL غير متاح" },
+          { status: 503 },
+        );
+      }
+      const result = await migratePostgresToMysql({
+        sourceDatabaseUrl: source,
+        prisma,
+        diagnoseOnly: true,
+      });
+      return NextResponse.json(result);
+    } catch (error) {
+      console.error("[migrate-from-supabase:diagnose]", error);
+      return NextResponse.json(
+        {
+          ok: false,
+          message: error instanceof Error ? error.message : "فشل التشخيص",
+        },
+        { status: 500 },
+      );
+    }
+  }
+
   if (confirm !== "1") {
     return NextResponse.json({
       ok: false,
       message:
-        "للتنفيذ أضف ?confirm=1 للرابط وأنت مسجّل دخول في لوحة التحكم",
+        "للتشخيص: ?diagnose=1 — للتنفيذ: ?confirm=1 (مع تسجيل دخول الأدمن)",
     });
   }
 

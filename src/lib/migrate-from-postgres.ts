@@ -50,7 +50,27 @@ export type MigrateResult = {
   ok: boolean;
   message: string;
   imported: Record<string, number>;
+  found?: Record<string, number>;
+  mysqlCounts?: Record<string, number>;
+  sourceTables?: string[];
 };
+
+async function countMysqlRows(
+  prisma: PrismaClient,
+): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  for (const { model, table } of MIGRATE_TABLES) {
+    try {
+      const delegate = prisma[model] as unknown as {
+        count: () => Promise<number>;
+      };
+      counts[table] = await delegate.count();
+    } catch {
+      counts[table] = -1;
+    }
+  }
+  return counts;
+}
 
 /**
  * ينقل الصفوف من Postgres (Supabase) إلى MySQL عبر Prisma.
@@ -59,6 +79,7 @@ export type MigrateResult = {
 export async function migratePostgresToMysql(options: {
   sourceDatabaseUrl: string;
   prisma: PrismaClient;
+  diagnoseOnly?: boolean;
 }): Promise<MigrateResult> {
   const sourceUrl = options.sourceDatabaseUrl.trim();
   if (!sourceUrl.startsWith("postgres")) {
@@ -84,14 +105,26 @@ export async function migratePostgresToMysql(options: {
 
   await pg.connect();
   const imported: Record<string, number> = {};
+  const found: Record<string, number> = {};
 
   try {
+    const listed = await pg.query<{ tablename: string }>(
+      `SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public' ORDER BY tablename`,
+    );
+    const sourceTables = listed.rows.map((r) => r.tablename);
+
     for (const { table, model } of MIGRATE_TABLES) {
+      imported[table] = 0;
+      found[table] = 0;
+
+      const tableExists = sourceTables.includes(table);
+      if (!tableExists) continue;
+
       const result = await pg.query(`SELECT * FROM "${table}"`);
       const rows = (result.rows as Row[]).map(normalizeRow);
-      imported[table] = 0;
+      found[table] = rows.length;
 
-      if (rows.length === 0) continue;
+      if (options.diagnoseOnly || rows.length === 0) continue;
 
       const delegate = options.prisma[model] as unknown as {
         createMany: (args: {
@@ -110,14 +143,36 @@ export async function migratePostgresToMysql(options: {
         imported[table] += created.count;
       }
     }
+
+    const mysqlCounts = await countMysqlRows(options.prisma);
+    const foundTotal = Object.values(found).reduce((a, b) => a + b, 0);
+    const importedTotal = Object.values(imported).reduce((a, b) => a + b, 0);
+
+    if (options.diagnoseOnly) {
+      return {
+        ok: true,
+        message: `تشخيص: Supabase فيه ${foundTotal} صف، MySQL فيه ${Object.values(mysqlCounts).reduce((a, b) => a + b, 0)} صف`,
+        imported,
+        found,
+        mysqlCounts,
+        sourceTables,
+      };
+    }
+
+    return {
+      ok: true,
+      message:
+        foundTotal === 0
+          ? "Supabase فارغ أو الجداول غير موجودة في المصدر — لم يُستورد شيء"
+          : importedTotal === 0
+            ? `وُجد ${foundTotal} صف في Supabase لكن لم يُدرج جديد (غالباً موجود مسبقاً في MySQL)`
+            : `تم استيراد ${importedTotal} صفاً من أصل ${foundTotal}`,
+      imported,
+      found,
+      mysqlCounts,
+      sourceTables,
+    };
   } finally {
     await pg.end().catch(() => undefined);
   }
-
-  const total = Object.values(imported).reduce((a, b) => a + b, 0);
-  return {
-    ok: true,
-    message: `تم استيراد ${total} صفاً من Supabase إلى MySQL`,
-    imported,
-  };
 }
