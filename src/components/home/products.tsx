@@ -81,7 +81,7 @@ export function Products({ products }: { products: ProductView[] }) {
         link={sections.products.link}
       />
 
-      <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-5 md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+      <div className="no-scrollbar flex snap-x snap-mandatory gap-2.5 overflow-x-auto pe-1 md:grid md:grid-cols-3 md:overflow-visible md:pe-0">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
