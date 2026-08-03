@@ -35,15 +35,18 @@ function AwardCard({ award }: { award: AwardView }) {
 
 /** emptyState: لو ما عنده جوائز، القسم كامل يُخفى */
 export function Awards({ awards }: { awards: AwardView[] }) {
-  if (awards.length === 0) return null;
+  const items = awards.filter(
+    (award) => award.title.trim() || award.org.trim() || award.description.trim(),
+  );
+  if (items.length === 0) return null;
 
   return (
     <Section id="awards" padded={false} className="py-[50px]">
       <SectionHeader icon={TrophyIcon} title={sections.awards.title} />
 
-      {/* صف أفقي قابل للسحب — البطاقات تتجاوز عرض العمود كما في المرجع */}
-      <div className="no-scrollbar -mx-5 flex snap-x gap-6 overflow-x-auto px-5 md:mx-0 md:px-0">
-        {awards.map((award) => (
+      {/* صف أفقي قابل للسحب — يبقى داخل حواف الحاوية على الموبايل */}
+      <div className="no-scrollbar flex snap-x gap-5 overflow-x-auto pe-1 md:gap-6">
+        {items.map((award) => (
           <AwardCard key={award.id} award={award} />
         ))}
       </div>
