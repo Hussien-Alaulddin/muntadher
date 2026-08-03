@@ -65,11 +65,21 @@ export async function migratePostgresToMysql(options: {
     throw new Error("SOURCE_DATABASE_URL يجب أن يكون رابط PostgreSQL");
   }
 
+  // Hostinger غالباً يعترض سلسلة شهادات SSL نحو Supabase
+  let connectionString = sourceUrl;
+  try {
+    const parsed = new URL(sourceUrl);
+    parsed.searchParams.delete("sslmode");
+    connectionString = parsed.toString();
+  } catch {
+    /* ignore */
+  }
+
   const pg = new PgClient({
-    connectionString: sourceUrl,
-    ssl: /supabase|sslmode=require/i.test(sourceUrl)
-      ? { rejectUnauthorized: false }
-      : undefined,
+    connectionString,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   });
 
   await pg.connect();
