@@ -100,38 +100,78 @@ export function Navbar({
             type="button"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
+            aria-controls="mobile-nav"
             aria-label="القائمة"
             className="flex size-9 items-center justify-center rounded-[9px] bg-surface transition-colors duration-200 hover:bg-surface-alt md:hidden"
           >
-            <span className="flex flex-col gap-[5px]">
-              <span className="block h-[1.5px] w-4 bg-ink" />
-              <span className="block h-[1.5px] w-4 bg-ink" />
-              <span className="block h-[1.5px] w-4 bg-ink" />
+            <span className="relative flex size-4 flex-col justify-center gap-[5px]">
+              <span
+                className={cx(
+                  "block h-[1.5px] w-4 origin-center bg-ink transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  open && "translate-y-[6.5px] rotate-45",
+                )}
+              />
+              <span
+                className={cx(
+                  "block h-[1.5px] w-4 bg-ink transition-opacity duration-200",
+                  open && "opacity-0",
+                )}
+              />
+              <span
+                className={cx(
+                  "block h-[1.5px] w-4 origin-center bg-ink transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  open && "-translate-y-[6.5px] -rotate-45",
+                )}
+              />
             </span>
           </button>
         </div>
       </nav>
 
-      {open ? (
-        <div className="bg-page md:hidden">
-          <ul className="container-site flex flex-col pb-3">
-            {links.map((link) => (
-              <li key={link.href}>
+      <div
+        id="mobile-nav"
+        className={cx(
+          "mobile-nav-panel grid bg-page transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden",
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        )}
+        aria-hidden={!open}
+      >
+        <div className="overflow-hidden">
+          <ul className="container-site flex flex-col border-t border-ink/5 pb-4 pt-1">
+            {links.map((link, index) => (
+              <li
+                key={link.href}
+                className={open ? "animate-mobile-nav-link" : undefined}
+                style={
+                  open
+                    ? { animationDelay: `${40 + index * 35}ms` }
+                    : undefined
+                }
+              >
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block py-2.5 text-body font-medium text-ink"
+                  tabIndex={open ? undefined : -1}
+                  className="block py-2.5 text-body font-medium text-ink transition-opacity duration-200 hover:opacity-60"
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
-            <li>
+            <li
+              className={open ? "animate-mobile-nav-link" : undefined}
+              style={
+                open
+                  ? { animationDelay: `${40 + links.length * 35}ms` }
+                  : undefined
+              }
+            >
               {customer ? (
                 <Link
                   href="/profile"
                   onClick={() => setOpen(false)}
-                  className="block py-2.5 text-body font-medium text-ink"
+                  tabIndex={open ? undefined : -1}
+                  className="block py-2.5 text-body font-medium text-ink transition-opacity duration-200 hover:opacity-60"
                 >
                   الملف الشخصي · {customer.name}
                 </Link>
@@ -139,16 +179,28 @@ export function Navbar({
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="block py-2.5 text-body font-medium text-ink"
+                  tabIndex={open ? undefined : -1}
+                  className="block py-2.5 text-body font-medium text-ink transition-opacity duration-200 hover:opacity-60"
                 >
                   تسجيل/دخول
                 </Link>
               )}
             </li>
-            <li className="pt-2">
+            <li
+              className={cx(
+                "pt-2",
+                open ? "animate-mobile-nav-link" : undefined,
+              )}
+              style={
+                open
+                  ? { animationDelay: `${40 + (links.length + 1) * 35}ms` }
+                  : undefined
+              }
+            >
               <Link
                 href={ctaHref}
                 onClick={() => setOpen(false)}
+                tabIndex={open ? undefined : -1}
                 className={cx(primaryButtonClass, "w-full")}
               >
                 {navbar.cta.label}
@@ -156,7 +208,7 @@ export function Navbar({
             </li>
           </ul>
         </div>
-      ) : null}
+      </div>
     </header>
   );
 }

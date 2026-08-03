@@ -342,6 +342,22 @@
   animation: form-step-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* قائمة الموبايل — فتح/إغلاق سلس */
+@keyframes mobile-nav-link-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@utility animate-mobile-nav-link {
+  animation: mobile-nav-link-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* سلايدر تقييمات الدورة */
 @media (prefers-reduced-motion: reduce) {
   .animate-logo-marquee,
@@ -350,8 +366,13 @@
   .animate-nav-progress,
   .animate-hero-enter,
   .animate-page-enter,
-  .animate-form-step-in {
+  .animate-form-step-in,
+  .animate-mobile-nav-link {
     animation: none;
+  }
+
+  .mobile-nav-panel {
+    transition: none !important;
   }
 
   .reveal {
