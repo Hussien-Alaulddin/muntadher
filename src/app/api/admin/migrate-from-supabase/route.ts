@@ -6,15 +6,33 @@ import { getPrisma, resetPrisma } from "@/lib/prisma";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
+function migrationDisabledResponse() {
+  return NextResponse.json(
+    {
+      ok: false,
+      message:
+        "مسار الترحيل معطّل في الإنتاج. للتفعيل المؤقت فقط: ALLOW_DB_MIGRATE=1 مع SOURCE_DATABASE_URL",
+    },
+    { status: 403 },
+  );
+}
+
+function isMigrationAllowed() {
+  if (process.env.ALLOW_DB_MIGRATE === "1") return true;
+  return process.env.NODE_ENV !== "production";
+}
+
 /**
  * ترحيل لمرة واحدة من Supabase Postgres → MySQL على السيرفر.
- * لا يحتاج Remote MySQL.
+ * معطّل في الإنتاج ما لم يُضبط ALLOW_DB_MIGRATE=1.
  *
  * المتطلب: SOURCE_DATABASE_URL في متغيرات البيئة (رابط Postgres القديم)
  * الاستخدام وأنت مسجّل دخول أدمن:
  *   /api/admin/migrate-from-supabase?confirm=1
  */
 async function runMigration() {
+  if (!isMigrationAllowed()) return migrationDisabledResponse();
+
   const source = process.env.SOURCE_DATABASE_URL?.trim();
   if (!source?.startsWith("postgres")) {
     return NextResponse.json(
@@ -47,6 +65,8 @@ async function runMigration() {
 export async function GET(request: Request) {
   const denied = await checkAdmin(request);
   if (denied) return denied;
+
+  if (!isMigrationAllowed()) return migrationDisabledResponse();
 
   const confirm = new URL(request.url).searchParams.get("confirm");
   const diagnose = new URL(request.url).searchParams.get("diagnose");
@@ -111,6 +131,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const denied = await checkAdmin(request);
   if (denied) return denied;
+
+  if (!isMigrationAllowed()) return migrationDisabledResponse();
 
   try {
     return await runMigration();

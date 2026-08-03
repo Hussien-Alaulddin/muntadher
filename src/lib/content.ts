@@ -240,7 +240,7 @@ const defaultSettings: SettingsView = {
 /** التسميات الأربع ثابتة دائماً من fixed-content */
 /**
  * الحالة قبل ربط Supabase: تُعرض الصفحة كاملة بالمحتوى الابتدائي والتجريبي
- * عشان يشوف المصمم كل الأقسام. مع DEMO_CONTENT=off ترجع الأقسام اللي ما لها
+ * عشان يشوف المصمم كل الأقسام عند DEMO_CONTENT=on. بدونها ترجع الأقسام اللي ما لها
  * محتوى ابتدائي في page-home.json لسلوك emptyState الطبيعي.
  */
 function placeholderHomeContent(): HomeContent {

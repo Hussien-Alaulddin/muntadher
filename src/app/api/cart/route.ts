@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { customerIdFromRequest } from "@/lib/customer-auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 async function requireCustomer(request: Request) {
+  const limited = rateLimit(`cart:${clientIp(request)}`, 60, 60 * 60_000);
+  if (!limited.ok) {
+    return {
+      error: NextResponse.json(
+        { message: "محاولات كثيرة — حاول لاحقاً" },
+        {
+          status: 429,
+          headers: { "Retry-After": String(limited.retryAfterSec) },
+        },
+      ),
+      customerId: null as string | null,
+      prisma: null,
+    };
+  }
+
   const customerId = customerIdFromRequest(request);
   if (!customerId) {
     return {

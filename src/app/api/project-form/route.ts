@@ -28,6 +28,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const contentLength = Number(request.headers.get("content-length") || 0);
+  if (contentLength > 48_000) {
+    return NextResponse.json(
+      { message: "حجم الطلب كبير جداً" },
+      { status: 413 },
+    );
+  }
+
   let body: { answers?: Record<string, unknown> };
   try {
     body = (await request.json()) as { answers?: Record<string, unknown> };
@@ -38,6 +46,14 @@ export async function POST(request: Request) {
   const answers = body.answers;
   if (!answers || typeof answers !== "object") {
     return NextResponse.json({ message: "الإجابات ناقصة" }, { status: 422 });
+  }
+
+  const serialized = JSON.stringify(answers);
+  if (serialized.length > 32_000) {
+    return NextResponse.json(
+      { message: "حجم الإجابات كبير جداً" },
+      { status: 413 },
+    );
   }
 
   const prisma = getPrisma();

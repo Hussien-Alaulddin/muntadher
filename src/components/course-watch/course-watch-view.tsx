@@ -62,12 +62,22 @@ function questionsStorageKey(productId: string, customerId: string) {
   return `montader-course-questions:${productId}:${customerId}`;
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function downloadCertificate(courseTitle: string) {
+  const safeTitle = escapeHtml(courseTitle);
   const html = `<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <title>شهادة — ${courseTitle}</title>
+  <title>شهادة — ${safeTitle}</title>
   <style>
     body { font-family: "IBM Plex Sans Arabic", Tajawal, sans-serif; margin: 0; background: #f3f7f6; color: #111; }
     .sheet { max-width: 900px; margin: 40px auto; padding: 48px; background: #fff; border: 2px solid #ff6614; border-radius: 24px; text-align: center; }
@@ -81,7 +91,7 @@ function downloadCertificate(courseTitle: string) {
   <div class="sheet">
     <h1>شهادة إتمام الدورة</h1>
     <p>تشهد منصة منتظر بأن المتعلم قد أكمل بنجاح دورة:</p>
-    <p class="title">${courseTitle}</p>
+    <p class="title">${safeTitle}</p>
     <p>مع خالص التهنئة والتوفيق.</p>
     <p class="meta">${new Date().toLocaleDateString("ar-IQ")}</p>
   </div>

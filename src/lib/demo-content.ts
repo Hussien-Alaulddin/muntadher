@@ -1,19 +1,19 @@
 /**
- * محتوى تجريبي (demo) يُعرض افتراضياً عشان يشوف المصمم الموقع كامل من أول تشغيل،
- * ويقدر يستبدله عنصراً عنصراً من لوحة التحكم.
+ * محتوى تجريبي (demo) للمعاينة أثناء البناء فقط.
+ * مفعّل فقط إذا DEMO_CONTENT=on صراحةً — معطّل افتراضياً للإطلاق العام.
  *
  * يغطي الأقسام اللي ما أعطاها page-home.json محتوى ابتدائي: بانر "جديد"،
  * الأسئلة الشائعة، شعارات العملاء. أما الجوائز والتأثير الرقمي والشهادات
  * فمحتواها منقول من placeholderContent في page-home.json نفسه.
  *
- * كل النصوص موسومة صريحاً بأنها تجريبية. لإخفائها كلها قبل الإطلاق للعامة:
- * DEMO_CONTENT=off في متغيّرات البيئة، أو احذف العناصر من لوحة التحكم.
+ * كل النصوص موسومة صريحاً بأنها تجريبية. لإظهارها أثناء التجهيز:
+ * DEMO_CONTENT=on في متغيّرات البيئة.
  */
 
 import { trustPlaceholders } from "@/lib/placeholder-content";
 
-/** المحتوى التجريبي مفعّل افتراضياً، ويُطفأ بـ DEMO_CONTENT=off */
-export const isDemoContentEnabled = process.env.DEMO_CONTENT !== "off";
+/** المحتوى التجريبي معطّل افتراضياً — يُفعَّل بـ DEMO_CONTENT=on فقط */
+export const isDemoContentEnabled = process.env.DEMO_CONTENT === "on";
 
 export const demoBanner = {
   enabled: true,
