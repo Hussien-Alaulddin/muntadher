@@ -18,89 +18,183 @@ import {
 } from "@/lib/placeholder-content";
 import { PROJECT_CASE_IMAGE } from "@/lib/project-case-image";
 
-const PALETTES = [
-  { bg: "#1a1a1a", accent: "#ff6614", mute: "#2e2e2e" },
-  { bg: "#0f172a", accent: "#38bdf8", mute: "#1e293b" },
-  { bg: "#1c1917", accent: "#f59e0b", mute: "#292524" },
-  { bg: "#14532d", accent: "#86efac", mute: "#166534" },
-  { bg: "#4c1d95", accent: "#e9d5ff", mute: "#5b21b6" },
-  { bg: "#7f1d1d", accent: "#fecaca", mute: "#991b1b" },
-] as const;
-
-function escapeXml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+/**
+ * صور Unsplash مرخّصة للاستخدام الحر (Unsplash License).
+ * تُحمَّل وتُحفظ محلياً في MEDIA_ROOT حتى لا تعتمد على رابط خارجي لاحقاً.
+ */
+function unsplashPhoto(
+  photoId: string,
+  width: number,
+  height: number,
+): string {
+  return `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=${width}&h=${height}&q=85`;
 }
 
-async function renderAndSave(options: {
+type ProjectImageSet = {
+  card: string;
+  logo: string;
+  cover: string;
+  brand: [string, string];
+  application: [string, string];
+};
+
+/** صور تصميم حقيقية مناسبة لكل مشروع */
+const PROJECT_PHOTOS: Record<string, ProjectImageSet> = {
+  "rayhan-cafe": {
+    card: "photo-1495474472287-4d71bcdd2085",
+    logo: "photo-1509042239860-f550ce710b93",
+    cover: "photo-1554118811-1e0d58224f24",
+    brand: [
+      "photo-1442512595331-e89e7384260c",
+      "photo-1511920170033-f8396924c348",
+    ],
+    application: [
+      "photo-1453614512568-c4024d13c247",
+      "photo-1501339847302-ac426a4a7cbb",
+    ],
+  },
+  "noor-app": {
+    card: "photo-1506126613408-eca07ce68773",
+    logo: "photo-1518611012118-696072aa579a",
+    cover: "photo-1545389336-cf090694435e",
+    brand: [
+      "photo-1544367567-0f2fcb009e0b",
+      "photo-1506126613408-eca07ce68773",
+    ],
+    application: [
+      "photo-1518310383802-640c2de311b2",
+      "photo-1544367567-0f2fcb009e0b",
+    ],
+  },
+  "khatwa-studio": {
+    card: "photo-1522071820081-009f0129c71c",
+    logo: "photo-1558655146-9f40138edfeb",
+    cover: "photo-1497366216548-37526070297c",
+    brand: [
+      "photo-1586717791821-3f44a563fa4c",
+      "photo-1561070791-2526d30994b5",
+    ],
+    application: [
+      "photo-1558655146-d09347e92766",
+      "photo-1460925895917-afdab827c52f",
+    ],
+  },
+  "athar-personal": {
+    card: "photo-1507003211169-0a1dd7228f2d",
+    logo: "photo-1472099645785-5658abf4ff4e",
+    cover: "photo-1486312338219-ce68d2c6f44d",
+    brand: [
+      "photo-1499750310107-5fef28a66643",
+      "photo-1516321318423-f06f85e504b3",
+    ],
+    application: [
+      "photo-1432888498266-38ffec3eaf0a",
+      "photo-1454165804606-c3d57bc86b40",
+    ],
+  },
+  "oasis-resort": {
+    card: "photo-1566073771259-6a8506099945",
+    logo: "photo-1571896349842-33c89424de2d",
+    cover: "photo-1582719508461-905c673771fd",
+    brand: [
+      "photo-1520250497591-112f2f40a3f4",
+      "photo-1571003123894-1f0594d2b5d9",
+    ],
+    application: [
+      "photo-1564501049412-61c2a3083791",
+      "photo-1611892440504-42a792e24d32",
+    ],
+  },
+  "warraq-brand": {
+    card: "photo-1483985988355-763728e1935b",
+    logo: "photo-1469334031218-e382a71b716b",
+    cover: "photo-1490481651871-ab68de25d43d",
+    brand: [
+      "photo-1445205170230-053b83016050",
+      "photo-1469334031218-e382a71b716b",
+    ],
+    application: [
+      "photo-1558769132-cb1aea458c5e",
+      "photo-1483985988355-763728e1935b",
+    ],
+  },
+};
+
+const PRODUCT_PHOTOS: Record<
+  string,
+  { card: string; cover: string }
+> = {
+  "visual-identity-basics": {
+    card: "photo-1561070791-2526d30994b5",
+    cover: "photo-1558655146-d09347e92766",
+  },
+  "identity-bootcamp": {
+    card: "photo-1586717791821-3f44a563fa4c",
+    cover: "photo-1522071820081-009f0129c71c",
+  },
+  "colors-guide": {
+    card: "photo-1541701494587-cb58502866ab",
+    cover: "photo-1513364776144-60967b0f800f",
+  },
+  "print-files-guide": {
+    card: "photo-1562654501-a0ccc0fc3fb1",
+    cover: "photo-1497366216548-37526070297c",
+  },
+  "brand-style-sheet": {
+    card: "photo-1618005182384-a83a8bd57fbe",
+    cover: "photo-1558655146-9f40138edfeb",
+  },
+  "design-decisions-free": {
+    card: "photo-1512820790803-83ca734da794",
+    cover: "photo-1486312338219-ce68d2c6f44d",
+  },
+};
+
+const AWARD_PHOTOS = [
+  "photo-1567427017947-545c5f8d16ad",
+  "photo-1578269174936-2709b6aeb913",
+];
+
+const FALLBACK_PHOTO = "photo-1618005182384-a83a8bd57fbe";
+
+async function fetchImageBuffer(url: string): Promise<Buffer> {
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "muntadhar-demo-restore/1.0",
+      Accept: "image/*",
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`تعذّر تحميل الصورة (${res.status}): ${url}`);
+  }
+  return Buffer.from(await res.arrayBuffer());
+}
+
+async function downloadAndSave(options: {
   objectKey: string;
-  title: string;
-  subtitle: string;
+  photoId: string;
   width: number;
   height: number;
-  palette: (typeof PALETTES)[number];
-  variant?: "frame" | "logo" | "award";
 }): Promise<string> {
-  const {
-    objectKey,
-    title,
-    subtitle,
-    width,
-    height,
-    palette,
-    variant = "frame",
-  } = options;
-
-  const svg =
-    variant === "logo"
-      ? `
-<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${palette.bg}"/>
-      <stop offset="100%" stop-color="${palette.mute}"/>
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#g)"/>
-  <circle cx="${width / 2}" cy="${height / 2 - 40}" r="${Math.min(width, height) * 0.18}" fill="${palette.accent}" opacity="0.95"/>
-  <text x="50%" y="${height / 2 + 50}" text-anchor="middle" fill="#ffffff" font-size="${Math.round(Math.min(width, height) * 0.06)}" font-family="Arial, sans-serif" font-weight="700">${escapeXml(title.slice(0, 20))}</text>
-</svg>`
-      : variant === "award"
-        ? `
-<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${palette.bg}"/>
-      <stop offset="100%" stop-color="${palette.mute}"/>
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#g)"/>
-  <circle cx="${width / 2}" cy="${height / 2 - 80}" r="180" fill="none" stroke="${palette.accent}" stroke-width="14"/>
-  <circle cx="${width / 2}" cy="${height / 2 - 80}" r="110" fill="${palette.accent}" opacity="0.9"/>
-  <text x="50%" y="${height / 2 + 160}" text-anchor="middle" fill="#ffffff" font-size="64" font-family="Arial, sans-serif" font-weight="700">${escapeXml(title.slice(0, 22))}</text>
-  <text x="50%" y="${height / 2 + 240}" text-anchor="middle" fill="${palette.accent}" font-size="36" font-family="Arial, sans-serif">${escapeXml(subtitle.slice(0, 28))}</text>
-</svg>`
-        : `
-<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${palette.bg}"/>
-      <stop offset="100%" stop-color="${palette.mute}"/>
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#g)"/>
-  <rect x="${Math.round(width * 0.06)}" y="${Math.round(height * 0.08)}" width="${Math.round(width * 0.88)}" height="${Math.round(height * 0.84)}" fill="none" stroke="${palette.accent}" stroke-width="8" opacity="0.55"/>
-  <text x="${Math.round(width * 0.1)}" y="${Math.round(height * 0.28)}" fill="${palette.accent}" font-size="${Math.round(height * 0.045)}" font-family="Arial, sans-serif" font-weight="600">${escapeXml(subtitle)}</text>
-  <text x="${Math.round(width * 0.1)}" y="${Math.round(height * 0.42)}" fill="#ffffff" font-size="${Math.round(height * 0.08)}" font-family="Arial, sans-serif" font-weight="700">${escapeXml(title.slice(0, 28))}</text>
-  <text x="${Math.round(width * 0.1)}" y="${Math.round(height * 0.88)}" fill="#ffffff" font-size="${Math.round(height * 0.035)}" font-family="Arial, sans-serif" opacity="0.7">${width} × ${height}</text>
-</svg>`;
+  const { objectKey, photoId, width, height } = options;
+  const url = unsplashPhoto(photoId || FALLBACK_PHOTO, width * 2, height * 2);
+  let bytes: Buffer;
+  try {
+    bytes = await fetchImageBuffer(url);
+  } catch {
+    bytes = await fetchImageBuffer(
+      unsplashPhoto(FALLBACK_PHOTO, width * 2, height * 2),
+    );
+  }
 
   const absolute = path.join(publicMediaRootDir(), objectKey);
   await mkdir(path.dirname(absolute), { recursive: true });
-  await sharp(Buffer.from(svg)).jpeg({ quality: 84 }).toFile(absolute);
+  await sharp(bytes)
+    .rotate()
+    .resize(width, height, { fit: "cover", position: "centre" })
+    .jpeg({ quality: 85, mozjpeg: true })
+    .toFile(absolute);
+
   return publicMediaUrlForKey(objectKey);
 }
 
@@ -110,7 +204,7 @@ export type RestoreDemoResult = {
   awards: number;
 };
 
-/** يعيد زراعة المشاريع/المنتجات/الجوائز التجريبية مع صور بطاقات مناسبة */
+/** يعيد زراعة المحتوى التجريبي مع صور تصميم حقيقية من Unsplash */
 export async function restoreDemoContent(
   prisma: PrismaClient,
 ): Promise<RestoreDemoResult> {
@@ -124,65 +218,56 @@ export async function restoreDemoContent(
   const awardH = ADMIN_MEDIA_SIZES.award.height;
 
   for (const [index, project] of projectsPlaceholder.entries()) {
-    const palette = PALETTES[index % PALETTES.length];
+    const photos = PROJECT_PHOTOS[project.slug] ?? {
+      card: FALLBACK_PHOTO,
+      logo: FALLBACK_PHOTO,
+      cover: FALLBACK_PHOTO,
+      brand: [FALLBACK_PHOTO, FALLBACK_PHOTO] as [string, string],
+      application: [FALLBACK_PHOTO, FALLBACK_PHOTO] as [string, string],
+    };
     const base = project.slug;
 
-    const imageUrl = await renderAndSave({
+    const imageUrl = await downloadAndSave({
       objectKey: `projects/demo/${base}-card.jpg`,
-      title: project.title,
-      subtitle: "بطاقة المشروع",
+      photoId: photos.card,
       width: cardW,
       height: cardH,
-      palette,
     });
-    const logoImageUrl = await renderAndSave({
+    const logoImageUrl = await downloadAndSave({
       objectKey: `projects/demo/${base}-logo.jpg`,
-      title: project.title.split("|")[0]?.trim() || project.title,
-      subtitle: "الشعار",
+      photoId: photos.logo,
       width: 1200,
       height: 1200,
-      palette,
-      variant: "logo",
     });
-    const coverImageUrl = await renderAndSave({
+    const coverImageUrl = await downloadAndSave({
       objectKey: `projects/demo/${base}-cover.jpg`,
-      title: project.title,
-      subtitle: "غلاف المشروع",
+      photoId: photos.cover,
       width: galleryW,
       height: galleryH,
-      palette,
     });
-    const brand1 = await renderAndSave({
+    const brand1 = await downloadAndSave({
       objectKey: `projects/demo/${base}-brand-1.jpg`,
-      title: project.title,
-      subtitle: "عنصر هوية 01",
+      photoId: photos.brand[0],
       width: galleryW,
       height: galleryH,
-      palette,
     });
-    const brand2 = await renderAndSave({
+    const brand2 = await downloadAndSave({
       objectKey: `projects/demo/${base}-brand-2.jpg`,
-      title: project.title,
-      subtitle: "عنصر هوية 02",
+      photoId: photos.brand[1],
       width: galleryW,
       height: galleryH,
-      palette,
     });
-    const app1 = await renderAndSave({
+    const app1 = await downloadAndSave({
       objectKey: `projects/demo/${base}-app-1.jpg`,
-      title: project.title,
-      subtitle: "تطبيق 01",
+      photoId: photos.application[0],
       width: galleryW,
       height: galleryH,
-      palette,
     });
-    const app2 = await renderAndSave({
+    const app2 = await downloadAndSave({
       objectKey: `projects/demo/${base}-app-2.jpg`,
-      title: project.title,
-      subtitle: "تطبيق 02",
+      photoId: photos.application[1],
       width: galleryW,
       height: galleryH,
-      palette,
     });
 
     await prisma.project.upsert({
@@ -291,23 +376,22 @@ export async function restoreDemoContent(
   ];
 
   let order = 1;
-  for (const [index, product] of productsPlaceholder.entries()) {
-    const palette = PALETTES[index % PALETTES.length];
-    const imageUrl = await renderAndSave({
+  for (const product of productsPlaceholder) {
+    const photos = PRODUCT_PHOTOS[product.slug] ?? {
+      card: FALLBACK_PHOTO,
+      cover: FALLBACK_PHOTO,
+    };
+    const imageUrl = await downloadAndSave({
       objectKey: `products/demo/${product.slug}-card.jpg`,
-      title: product.title,
-      subtitle: product.group === "core" ? "دورة تدريبية" : "كتيّب إلكتروني",
+      photoId: photos.card,
       width: productW,
       height: productH,
-      palette,
     });
-    const coverImageUrl = await renderAndSave({
+    const coverImageUrl = await downloadAndSave({
       objectKey: `products/demo/${product.slug}-cover.jpg`,
-      title: product.title,
-      subtitle: "غلاف التفاصيل",
+      photoId: photos.cover,
       width: ADMIN_MEDIA_SIZES.productCover.width,
       height: ADMIN_MEDIA_SIZES.productCover.height,
-      palette,
     });
 
     const body =
@@ -347,27 +431,23 @@ export async function restoreDemoContent(
     });
   }
 
-  for (const [index, booklet] of bookletExtras.entries()) {
-    if (booklet.slug === "colors-guide") {
-      // already handled via productsPlaceholder
-      continue;
-    }
-    const palette = PALETTES[(index + 3) % PALETTES.length];
-    const imageUrl = await renderAndSave({
+  for (const booklet of bookletExtras) {
+    if (booklet.slug === "colors-guide") continue;
+    const photos = PRODUCT_PHOTOS[booklet.slug] ?? {
+      card: FALLBACK_PHOTO,
+      cover: FALLBACK_PHOTO,
+    };
+    const imageUrl = await downloadAndSave({
       objectKey: `products/demo/${booklet.slug}-card.jpg`,
-      title: booklet.title,
-      subtitle: "كتيّب إلكتروني",
+      photoId: photos.card,
       width: productW,
       height: productH,
-      palette,
     });
-    const coverImageUrl = await renderAndSave({
+    const coverImageUrl = await downloadAndSave({
       objectKey: `products/demo/${booklet.slug}-cover.jpg`,
-      title: booklet.title,
-      subtitle: "غلاف الكتيّب",
+      photoId: photos.cover,
       width: ADMIN_MEDIA_SIZES.productCover.width,
       height: ADMIN_MEDIA_SIZES.productCover.height,
-      palette,
     });
 
     await prisma.product.upsert({
@@ -403,24 +483,17 @@ export async function restoreDemoContent(
 
   await prisma.award.deleteMany({
     where: {
-      OR: [
-        { org: "جهة تجريبية" },
-        { title: { contains: "تجريبي" } },
-      ],
+      OR: [{ org: "جهة تجريبية" }, { title: { contains: "تجريبي" } }],
     },
   });
 
   let awardsCreated = 0;
   for (const [index, award] of demoAwards.entries()) {
-    const palette = PALETTES[index % PALETTES.length];
-    const imageUrl = await renderAndSave({
+    const imageUrl = await downloadAndSave({
       objectKey: `awards/demo/award-${index + 1}.jpg`,
-      title: award.title,
-      subtitle: award.org,
+      photoId: AWARD_PHOTOS[index] ?? FALLBACK_PHOTO,
       width: awardW,
       height: awardH,
-      palette,
-      variant: "award",
     });
     await prisma.award.create({
       data: {
