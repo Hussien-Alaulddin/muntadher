@@ -202,12 +202,15 @@ export type RestoreDemoResult = {
   projects: number;
   products: number;
   awards: number;
+  stamp: string;
 };
 
 /** يعيد زراعة المحتوى التجريبي مع صور تصميم حقيقية من Unsplash */
 export async function restoreDemoContent(
   prisma: PrismaClient,
 ): Promise<RestoreDemoResult> {
+  // اسم فريد لكل تشغيل لكسر كاش المتصفح عند استبدال الصور
+  const stamp = Date.now().toString(36);
   const galleryW = PROJECT_CASE_IMAGE.width;
   const galleryH = PROJECT_CASE_IMAGE.height;
   const cardW = ADMIN_MEDIA_SIZES.projectCard.width;
@@ -225,7 +228,7 @@ export async function restoreDemoContent(
       brand: [FALLBACK_PHOTO, FALLBACK_PHOTO] as [string, string],
       application: [FALLBACK_PHOTO, FALLBACK_PHOTO] as [string, string],
     };
-    const base = project.slug;
+    const base = `${project.slug}-${stamp}`;
 
     const imageUrl = await downloadAndSave({
       objectKey: `projects/demo/${base}-card.jpg`,
@@ -382,13 +385,13 @@ export async function restoreDemoContent(
       cover: FALLBACK_PHOTO,
     };
     const imageUrl = await downloadAndSave({
-      objectKey: `products/demo/${product.slug}-card.jpg`,
+      objectKey: `products/demo/${product.slug}-${stamp}-card.jpg`,
       photoId: photos.card,
       width: productW,
       height: productH,
     });
     const coverImageUrl = await downloadAndSave({
-      objectKey: `products/demo/${product.slug}-cover.jpg`,
+      objectKey: `products/demo/${product.slug}-${stamp}-cover.jpg`,
       photoId: photos.cover,
       width: ADMIN_MEDIA_SIZES.productCover.width,
       height: ADMIN_MEDIA_SIZES.productCover.height,
@@ -438,13 +441,13 @@ export async function restoreDemoContent(
       cover: FALLBACK_PHOTO,
     };
     const imageUrl = await downloadAndSave({
-      objectKey: `products/demo/${booklet.slug}-card.jpg`,
+      objectKey: `products/demo/${booklet.slug}-${stamp}-card.jpg`,
       photoId: photos.card,
       width: productW,
       height: productH,
     });
     const coverImageUrl = await downloadAndSave({
-      objectKey: `products/demo/${booklet.slug}-cover.jpg`,
+      objectKey: `products/demo/${booklet.slug}-${stamp}-cover.jpg`,
       photoId: photos.cover,
       width: ADMIN_MEDIA_SIZES.productCover.width,
       height: ADMIN_MEDIA_SIZES.productCover.height,
@@ -490,7 +493,7 @@ export async function restoreDemoContent(
   let awardsCreated = 0;
   for (const [index, award] of demoAwards.entries()) {
     const imageUrl = await downloadAndSave({
-      objectKey: `awards/demo/award-${index + 1}.jpg`,
+      objectKey: `awards/demo/award-${index + 1}-${stamp}.jpg`,
       photoId: AWARD_PHOTOS[index] ?? FALLBACK_PHOTO,
       width: awardW,
       height: awardH,
@@ -517,5 +520,6 @@ export async function restoreDemoContent(
     projects: projectsPlaceholder.length,
     products: productsPlaceholder.length + demoBookletsExtra.length,
     awards: awardsCreated,
+    stamp,
   };
 }
