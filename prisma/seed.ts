@@ -98,12 +98,17 @@ async function main() {
         externalCaseStudyUrl: externalCaseStudyUrl ?? null,
         externalCaseStudyLabel: externalCaseStudyLabel ?? null,
         order: index + 1,
+        published: true,
       },
       update: {
+        title,
+        category,
         description,
         meta,
         externalCaseStudyUrl: externalCaseStudyUrl ?? null,
         externalCaseStudyLabel: externalCaseStudyLabel ?? null,
+        order: index + 1,
+        published: true,
       },
     });
   }
@@ -116,6 +121,7 @@ async function main() {
         ...rest,
         body: body ?? null,
         order: index + 1,
+        published: true,
       },
       update: {
         description: product.description,
@@ -124,6 +130,7 @@ async function main() {
         title: product.title,
         price: product.price,
         ctaLabel: product.ctaLabel,
+        published: true,
         ...(body ? { body } : {}),
       },
     });
