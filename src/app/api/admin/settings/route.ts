@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
 import { deleteRemovedManagedMedia } from "@/lib/delete-record-media";
 import { withDbRetry } from "@/lib/prisma";
+import { revalidateSite } from "@/lib/revalidate-site";
 
 const settingsFields = [
   "designerName",
@@ -113,9 +113,7 @@ export async function PATCH(request: Request) {
       await deleteRemovedManagedMedia(previous.prevBanner, banner);
     }
 
-    revalidatePath("/");
-    revalidatePath("/projects");
-    revalidateTag("site-content");
+    revalidateSite();
 
     return NextResponse.json({ settings, banner });
   } catch (err) {

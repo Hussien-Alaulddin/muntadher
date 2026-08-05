@@ -185,7 +185,7 @@ export function SiteChat() {
   }
 
   return (
-    <div className="pointer-events-none fixed end-4 bottom-4 z-50 flex flex-col items-end gap-3 md:end-6 md:bottom-6">
+    <div className="pointer-events-none fixed end-4 bottom-4 z-[80] flex flex-col items-end gap-3 md:end-6 md:bottom-6">
       {open ? (
         <div
           className="pointer-events-auto flex h-[min(34rem,calc(100dvh-6.5rem))] w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-[16px] bg-page shadow-[0_16px_50px_rgba(17,16,17,0.16)] ring-1 ring-ink/8 animate-form-step-in"

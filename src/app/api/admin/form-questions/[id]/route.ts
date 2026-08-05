@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { clampOrder } from "@/lib/admin-order";
 import { withDbRetry } from "@/lib/prisma";
+import { revalidateSite } from "@/lib/revalidate-site";
 
 function asOptions(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
@@ -45,6 +46,7 @@ export async function PATCH(
       db.projectFormQuestion.update({ where: { id }, data }),
     );
 
+    revalidateSite();
     return NextResponse.json({
       item: { ...item, options: asOptions(item.options) },
     });
@@ -69,6 +71,7 @@ export async function DELETE(
     await withDbRetry((db) =>
       db.projectFormQuestion.delete({ where: { id } }),
     );
+    revalidateSite();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[admin/form-questions:delete]", error);

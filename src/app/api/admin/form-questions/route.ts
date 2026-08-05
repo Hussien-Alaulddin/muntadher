@@ -3,6 +3,7 @@ import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { clampOrder } from "@/lib/admin-order";
 import { withDbRetry } from "@/lib/prisma";
 import { projectFormQuestionsSeed } from "@/lib/project-form";
+import { revalidateSite } from "@/lib/revalidate-site";
 
 function asOptions(value: unknown): string[] | null {
   if (!Array.isArray(value)) return null;
@@ -92,6 +93,7 @@ export async function POST(request: Request) {
       });
     });
 
+    revalidateSite();
     return NextResponse.json({
       item: { ...item, options: asOptions(item.options) },
     });

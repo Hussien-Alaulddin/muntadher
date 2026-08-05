@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
 import { withDbRetry } from "@/lib/prisma";
 import { restoreDemoContent } from "@/lib/restore-demo-content";
+import { revalidateSite } from "@/lib/revalidate-site";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -15,10 +15,7 @@ export const maxDuration = 300;
  */
 async function runRestore() {
   const result = await withDbRetry((prisma) => restoreDemoContent(prisma));
-  revalidatePath("/");
-  revalidatePath("/projects");
-  revalidatePath("/products");
-  revalidateTag("site-content");
+  revalidateSite();
   return NextResponse.json({
     ok: true,
     message: "تمت استعادة المحتوى التجريبي مع الصور",

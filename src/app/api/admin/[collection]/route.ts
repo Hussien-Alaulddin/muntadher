@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
 import { checkAdmin, requireDatabase } from "@/lib/admin-auth";
 import { adminRouteError } from "@/lib/admin-route-error";
 import { clampOrder } from "@/lib/admin-order";
@@ -11,15 +10,9 @@ import {
   missingRequired,
   pickFields,
 } from "@/lib/admin-collections";
+import { revalidateSite } from "@/lib/revalidate-site";
 
 type Params = { params: Promise<{ collection: string }> };
-
-function revalidateSite() {
-  revalidatePath("/");
-  revalidatePath("/projects");
-  revalidatePath("/products");
-  revalidateTag("site-content");
-}
 
 export async function GET(request: Request, { params }: Params) {
   const unauthorized = await checkAdmin(request);

@@ -337,8 +337,12 @@ async function buildPublicSiteKnowledge(): Promise<string> {
   return knowledge;
 }
 
-/** معرفة موقعية مع كاش سريع في الذاكرة + كاش Next لمدة ٦٠ ثانية */
+/** معرفة موقعية مع كاش Next لمدة ٦٠ ثانية، ويُبطَل فوراً عند تعديل المحتوى */
 let ramCache: { value: string; expires: number } | null = null;
+
+export function clearPublicSiteKnowledgeCache() {
+  ramCache = null;
+}
 
 export async function getPublicSiteKnowledgeCached(
   _ctx?: ChatAssistantContext,
@@ -353,6 +357,6 @@ export async function getPublicSiteKnowledgeCached(
     { revalidate: 60, tags: [CONTENT_TAG] },
   )();
 
-  ramCache = { value, expires: Date.now() + 90_000 };
+  ramCache = { value, expires: Date.now() + 15_000 };
   return value;
 }

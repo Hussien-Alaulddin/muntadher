@@ -15,8 +15,8 @@ export default async function SiteLayout({
   const { settings, socials } = await getSiteChrome();
 
   return (
-    <SiteTransitions>
-      <ShopProvider>
+    <ShopProvider>
+      <SiteTransitions>
         <NavigationProgress />
         <Navbar
           designerName={settings.designerName}
@@ -25,9 +25,9 @@ export default async function SiteLayout({
         />
         {children}
         <Footer settings={settings} socials={socials} />
-        <SiteChatLazy />
         <Toaster richColors position="top-center" />
-      </ShopProvider>
-    </SiteTransitions>
+      </SiteTransitions>
+      <SiteChatLazy />
+    </ShopProvider>
   );
 }
